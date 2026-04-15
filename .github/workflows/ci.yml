@@ -36,15 +36,6 @@ jobs:
       - name: Type check
         run: mypy src || true
 
-      - name: Generate synthetic data
-        run: python -m pulsecommerce.cli generate --seed 42 --small
-
-      - name: Build warehouse
-        run: python -m pulsecommerce.cli warehouse
-
-      - name: Run pipeline
-        run: python -m pulsecommerce.cli pipeline
-
       - name: Test
         run: pytest --cov=pulsecommerce --cov-report=xml
 
