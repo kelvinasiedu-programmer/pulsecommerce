@@ -3,10 +3,12 @@
 > One unified warehouse. Five analytical layers. One coherent story that answers:
 > **Is the business healthy → where is it leaking → what's coming → who's leaving → what should we do?**
 
-[![CI](https://github.com/kelvinasiedu/pulsecommerce/actions/workflows/ci.yml/badge.svg)](https://github.com/kelvinasiedu/pulsecommerce/actions/workflows/ci.yml)
+### 🚀 [Live Demo → pulsecommerce.streamlit.app](https://pulsecommerce.streamlit.app/)
+
+[![Live Demo](https://img.shields.io/badge/demo-live-success?logo=streamlit&logoColor=white)](https://pulsecommerce.streamlit.app/)
+[![CI](https://github.com/kelvinasiedu-programmer/pulsecommerce/actions/workflows/ci.yml/badge.svg)](https://github.com/kelvinasiedu-programmer/pulsecommerce/actions/workflows/ci.yml)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Streamlit](https://img.shields.io/badge/deploy-Streamlit%20Cloud-FF4B4B?logo=streamlit)](https://streamlit.io/cloud)
 [![Docker](https://img.shields.io/badge/run-Docker-blue?logo=docker)](https://www.docker.com/)
 
 ---
