@@ -69,8 +69,12 @@ st.plotly_chart(fig, use_container_width=True)
 
 st.subheader("Model backtest (MAPE, lower is better)")
 if not mape.empty:
+    mape_cols = [c for c in mape.columns if c not in ("category", "chosen_model")]
     styled = mape.set_index("category")
-    st.dataframe(styled.style.highlight_min(axis=1, color="#0e7c3a"), use_container_width=True)
+    st.dataframe(
+        styled.style.highlight_min(subset=mape_cols, axis=1, color="#0e7c3a"),
+        use_container_width=True,
+    )
     winners = mape["chosen_model"].value_counts().rename("wins").reset_index()
     winners.columns = ["model", "categories_won"]
     st.markdown("**Model leaderboard**")
