@@ -1,0 +1,15 @@
+services:
+  pulsecommerce:
+    build: .
+    image: pulsecommerce:latest
+    container_name: pulsecommerce
+    ports:
+      - "8501:8501"
+    environment:
+      - PULSECOMMERCE_ENV=production
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8501/_stcore/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3

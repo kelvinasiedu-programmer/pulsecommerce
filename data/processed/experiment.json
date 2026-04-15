@@ -1,0 +1,55 @@
+{
+  "hypothesis": "Targeted 10% off promo lifts conversion on at-risk customers without hurting AOV or refund rate.",
+  "start": "2026-01-30",
+  "end": "2026-03-31",
+  "n_control": 57,
+  "n_treatment": 63,
+  "primary": {
+    "name": "conversion_rate",
+    "control_mean": 0.42105263157894735,
+    "treatment_mean": 0.31746031746031744,
+    "abs_lift": -0.1035923141186299,
+    "rel_lift": -0.24603174603174602,
+    "p_value": 0.24467046463890235,
+    "is_significant": false,
+    "is_guardrail": false,
+    "direction_ok": false
+  },
+  "guardrails": [
+    {
+      "name": "average_order_value",
+      "control_mean": 60.75470792363673,
+      "treatment_mean": 38.20930439222581,
+      "abs_lift": -22.54540353141092,
+      "rel_lift": -0.37108899543634527,
+      "p_value": 0.08515884440287222,
+      "is_significant": false,
+      "is_guardrail": true,
+      "direction_ok": false
+    },
+    {
+      "name": "items_per_order",
+      "control_mean": 1.2073007309572426,
+      "treatment_mean": 0.8619920083157027,
+      "abs_lift": -0.3453087226415399,
+      "rel_lift": -0.2860171569412967,
+      "p_value": 0.19083717984328474,
+      "is_significant": false,
+      "is_guardrail": true,
+      "direction_ok": false
+    },
+    {
+      "name": "refund_rate_proxy",
+      "control_mean": 0.044606510273694416,
+      "treatment_mean": 0.020711794750746918,
+      "abs_lift": -0.023894715522947498,
+      "rel_lift": -0.5356777604061713,
+      "p_value": 0.35876032665676827,
+      "is_significant": false,
+      "is_guardrail": true,
+      "direction_ok": true
+    }
+  ],
+  "recommendation": "reject",
+  "rationale": "No meaningful lift detected (\u0394=-24.60%, p=0.245)."
+}
