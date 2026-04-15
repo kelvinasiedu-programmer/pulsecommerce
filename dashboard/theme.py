@@ -80,9 +80,22 @@ _GLOBAL_CSS = f"""
     max-width: 1400px;
   }}
 
-  /* Hide Streamlit chrome */
-  #MainMenu, footer, header {{ visibility: hidden; }}
+  /* Hide Streamlit chrome — but keep header so the sidebar expand arrow stays clickable */
+  #MainMenu, footer {{ visibility: hidden; }}
   .stDeployButton {{ display: none; }}
+  header[data-testid="stHeader"] {{
+    background: transparent;
+    height: 0;
+  }}
+  header[data-testid="stHeader"] > div:first-child {{ display: none; }}
+  /* Keep the sidebar toggle / collapsed-control button visible and on top */
+  [data-testid="stSidebarCollapseButton"],
+  [data-testid="stSidebarCollapsedControl"],
+  [data-testid="collapsedControl"] {{
+    visibility: visible !important;
+    display: flex !important;
+    z-index: 999 !important;
+  }}
 
   /* Sidebar */
   section[data-testid="stSidebar"] {{
