@@ -80,14 +80,43 @@ _GLOBAL_CSS = f"""
     max-width: 1400px;
   }}
 
-  /* Hide only the three-dot menu, Deploy button, and footer.
-     Keep the full Streamlit header so the sidebar toggle and page nav stay intact. */
+  /* Hide only the three-dot menu, Deploy button, and footer. */
   #MainMenu {{ display: none !important; }}
   footer {{ display: none !important; }}
   .stDeployButton {{ display: none !important; }}
-  [data-testid="stToolbar"] {{ display: none !important; }}
   header[data-testid="stHeader"] {{
     background: transparent;
+    z-index: 100;
+  }}
+  /* Hide only the toolbar actions (deploy/menu), NOT the sidebar toggle */
+  [data-testid="stToolbarActions"] {{ display: none !important; }}
+
+  /* Force the "re-open sidebar" button to always be visible and prominent
+     so users are never stranded after collapsing the sidebar. */
+  [data-testid="stSidebarCollapsedControl"],
+  [data-testid="collapsedControl"],
+  button[kind="header"][data-testid="baseButton-headerNoPadding"] {{
+    visibility: visible !important;
+    display: flex !important;
+    opacity: 1 !important;
+    z-index: 999 !important;
+  }}
+  [data-testid="stSidebarCollapsedControl"] button,
+  [data-testid="collapsedControl"] button {{
+    background: {COLORS['primary']} !important;
+    color: white !important;
+    border-radius: 8px !important;
+    box-shadow: 0 2px 8px rgba(79,70,229,0.35) !important;
+  }}
+  [data-testid="stSidebarCollapsedControl"] button svg,
+  [data-testid="collapsedControl"] button svg {{
+    color: white !important;
+    fill: white !important;
+  }}
+  /* Sidebar's own collapse chevron — keep obvious */
+  [data-testid="stSidebarCollapseButton"] {{
+    visibility: visible !important;
+    display: flex !important;
   }}
 
   /* Sidebar */
