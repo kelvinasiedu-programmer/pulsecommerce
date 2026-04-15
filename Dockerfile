@@ -24,8 +24,8 @@ COPY --chown=user scripts ./scripts
 
 RUN pip install --user -e .
 
-# Bake a small dataset + warehouse so the app boots instantly on HF.
-RUN python -m pulsecommerce.cli generate --seed 42 --small \
+# Bake the full dataset + warehouse so the app boots instantly on HF.
+RUN python -m pulsecommerce.cli generate --seed 42 \
     && python -m pulsecommerce.cli warehouse \
     && python -m pulsecommerce.cli pipeline
 

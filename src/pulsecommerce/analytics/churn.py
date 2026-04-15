@@ -202,6 +202,12 @@ class ChurnModel:
             random_state=self.cfg.random_state,
             stratify=stratify,
         )
+        if len(set(y_train)) < 2 or len(set(y_test)) < 2:
+            raise ValueError(
+                f"train/test split produced a single-class set "
+                f"(train={sorted(set(y_train))}, test={sorted(set(y_test))}); "
+                f"need more data or a longer churn window"
+            )
         pipe = self._build_pipeline()
         pipe.fit(X_train, y_train)
 
