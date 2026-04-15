@@ -80,28 +80,37 @@ _GLOBAL_CSS = f"""
     max-width: 1400px;
   }}
 
-  /* Hide Streamlit chrome — but keep header so the sidebar expand arrow stays clickable */
-  #MainMenu, footer {{ visibility: hidden; }}
-  .stDeployButton {{ display: none; }}
+  /* Hide only the three-dot menu, Deploy button, and footer.
+     Keep the full Streamlit header so the sidebar toggle and page nav stay intact. */
+  #MainMenu {{ display: none !important; }}
+  footer {{ display: none !important; }}
+  .stDeployButton {{ display: none !important; }}
+  [data-testid="stToolbar"] {{ display: none !important; }}
   header[data-testid="stHeader"] {{
     background: transparent;
-    height: 0;
-  }}
-  header[data-testid="stHeader"] > div:first-child {{ display: none; }}
-  /* Keep the sidebar toggle / collapsed-control button visible and on top */
-  [data-testid="stSidebarCollapseButton"],
-  [data-testid="stSidebarCollapsedControl"],
-  [data-testid="collapsedControl"] {{
-    visibility: visible !important;
-    display: flex !important;
-    z-index: 999 !important;
   }}
 
   /* Sidebar */
   section[data-testid="stSidebar"] {{
     background: #FFFFFF;
     border-right: 1px solid {COLORS['border']};
+    min-width: 260px !important;
   }}
+  /* Streamlit's auto page-navigation list */
+  [data-testid="stSidebarNav"] {{
+    padding-top: 8px;
+  }}
+  [data-testid="stSidebarNav"] ul {{ padding: 0 8px; }}
+  [data-testid="stSidebarNav"] a {{
+    color: {COLORS['text']} !important;
+    font-weight: 500;
+    border-radius: 8px;
+    padding: 6px 10px;
+  }}
+  [data-testid="stSidebarNav"] a:hover {{
+    background: {COLORS['primary_light']};
+  }}
+
   section[data-testid="stSidebar"] .stRadio label,
   section[data-testid="stSidebar"] p {{
     color: {COLORS['text']} !important;
