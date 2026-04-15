@@ -1,3 +1,14 @@
+---
+title: PulseCommerce
+emoji: 📈
+colorFrom: indigo
+colorTo: purple
+sdk: docker
+app_port: 7860
+pinned: false
+short_description: Ecommerce analytics — forecasting, churn, A/B testing
+---
+
 # 📈 PulseCommerce — End-to-End SMB Commerce Intelligence Platform
 
 > One unified warehouse. Five analytical layers. One coherent story that answers:

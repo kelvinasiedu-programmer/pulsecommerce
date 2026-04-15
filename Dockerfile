@@ -5,35 +5,34 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PIP_NO_CACHE_DIR=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1
 
-WORKDIR /app
+# HF Spaces runs as non-root user "user" with UID 1000
+RUN useradd -m -u 1000 user
+USER user
+ENV HOME=/home/user \
+    PATH=/home/user/.local/bin:$PATH
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-        build-essential \
-        curl \
-    && rm -rf /var/lib/apt/lists/*
+WORKDIR $HOME/app
 
-COPY requirements.txt ./
-RUN pip install -r requirements.txt
+COPY --chown=user requirements.txt ./
+RUN pip install --user -r requirements.txt
 
-COPY pyproject.toml README.md ./
-COPY src ./src
-COPY sql ./sql
-COPY dashboard ./dashboard
-COPY scripts ./scripts
+COPY --chown=user pyproject.toml README.md ./
+COPY --chown=user src ./src
+COPY --chown=user sql ./sql
+COPY --chown=user dashboard ./dashboard
+COPY --chown=user scripts ./scripts
 
-RUN pip install -e .
+RUN pip install --user -e .
 
-RUN python -m pulsecommerce.cli generate --seed 42 \
+# Bake a small dataset + warehouse so the app boots instantly on HF.
+RUN python -m pulsecommerce.cli generate --seed 42 --small \
     && python -m pulsecommerce.cli warehouse \
     && python -m pulsecommerce.cli pipeline
 
-EXPOSE 8501
-
-HEALTHCHECK --interval=30s --timeout=10s --start-period=15s --retries=3 \
-    CMD curl -fsS http://localhost:8501/_stcore/health || exit 1
+EXPOSE 7860
 
 CMD ["streamlit", "run", "dashboard/Home.py", \
-     "--server.port=8501", \
+     "--server.port=7860", \
      "--server.address=0.0.0.0", \
      "--server.headless=true", \
      "--browser.gatherUsageStats=false"]
