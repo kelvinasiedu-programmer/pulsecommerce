@@ -166,7 +166,17 @@ _GLOBAL_CSS = f"""
   section[data-testid="stSidebar"] {{
     background: #FFFFFF;
     border-right: 1px solid {COLORS['border']};
+  }}
+  /* Only pin width when the sidebar is actually expanded, so it can
+     collapse to 0 and let main content flush left. */
+  section[data-testid="stSidebar"][aria-expanded="true"] {{
     min-width: 260px !important;
+  }}
+  /* Ensure the collapsed sidebar has no visible footprint */
+  section[data-testid="stSidebar"][aria-expanded="false"] {{
+    min-width: 0 !important;
+    width: 0 !important;
+    border-right: none !important;
   }}
   /* Streamlit's auto page-navigation list */
   [data-testid="stSidebarNav"] {{
