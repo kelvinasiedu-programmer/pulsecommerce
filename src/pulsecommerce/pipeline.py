@@ -83,22 +83,33 @@ def run_pipeline(out_dir: Path = PROCESSED_DIR) -> dict[str, Path]:
 
         # 4. Churn
         logger.info("layer 4 — training churn model")
-        churn = ChurnModel(wh).fit_and_score()
-        paths["churn_scores"] = _write(churn.scores, out_dir / "churn_scores.parquet")
-        paths["cohort_retention"] = _write(
-            churn.cohort_retention, out_dir / "cohort_retention.parquet"
-        )
-        paths["churn_importance"] = _write(
-            churn.feature_importance, out_dir / "churn_importance.parquet"
-        )
-        _write_json(churn.metrics, out_dir / "churn_metrics.json")
-        paths["churn_metrics"] = out_dir / "churn_metrics.json"
+        churn = None
+        try:
+            churn = ChurnModel(wh).fit_and_score()
+            paths["churn_scores"] = _write(churn.scores, out_dir / "churn_scores.parquet")
+            paths["cohort_retention"] = _write(
+                churn.cohort_retention, out_dir / "cohort_retention.parquet"
+            )
+            paths["churn_importance"] = _write(
+                churn.feature_importance, out_dir / "churn_importance.parquet"
+            )
+            _write_json(churn.metrics, out_dir / "churn_metrics.json")
+            paths["churn_metrics"] = out_dir / "churn_metrics.json"
+        except (ValueError, RuntimeError) as exc:
+            logger.warning("skipping churn layer — insufficient signal: %s", exc)
+            _write_json(
+                {"skipped": True, "reason": str(exc)}, out_dir / "churn_metrics.json"
+            )
+            paths["churn_metrics"] = out_dir / "churn_metrics.json"
 
-        # 5. Experiment on top-risk customers
+        # 5. Experiment on top-risk customers (or untargeted if churn skipped)
         logger.info("layer 5 — running simulated experiment readout")
-        audience = churn.scores.nlargest(max(int(len(churn.scores) * 0.3), 500), "churn_risk")[
-            ["user_id"]
-        ]
+        if churn is not None:
+            audience = churn.scores.nlargest(
+                max(int(len(churn.scores) * 0.3), 500), "churn_risk"
+            )[["user_id"]]
+        else:
+            audience = None
         exp = PromotionExperiment(wh).run(audience=audience)
         _write_json(
             {
