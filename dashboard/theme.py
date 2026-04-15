@@ -108,11 +108,19 @@ _GLOBAL_CSS = f"""
     background: {COLORS['bg']};
   }}
 
-  /* Main block padding */
+  /* Main block — fluid width so content expands when the sidebar is collapsed */
   .main .block-container {{
     padding-top: 1.5rem;
     padding-bottom: 4rem;
-    max-width: 1400px;
+    padding-left: 2.5rem;
+    padding-right: 2.5rem;
+    max-width: 100%;
+  }}
+  @media (min-width: 1600px) {{
+    .main .block-container {{
+      padding-left: 4rem;
+      padding-right: 4rem;
+    }}
   }}
 
   /* Hide only the three-dot menu, Deploy button, and footer. */
@@ -215,9 +223,13 @@ _GLOBAL_CSS = f"""
     letter-spacing: 0.04em;
   }}
   [data-testid="stMetricValue"] {{
-    font-size: 1.75rem !important;
+    font-size: 1.5rem !important;
     font-weight: 700 !important;
     color: {COLORS['text']} !important;
+    line-height: 1.1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }}
   [data-testid="stMetricDelta"] {{
     font-size: 0.8rem !important;
