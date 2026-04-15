@@ -57,6 +57,41 @@ def apply_theme(page_title: str, page_icon: str) -> None:
         initial_sidebar_state="expanded",
     )
     st.markdown(_GLOBAL_CSS, unsafe_allow_html=True)
+    _force_sidebar_open()
+
+
+def _force_sidebar_open() -> None:
+    """Streamlit remembers the user's collapsed/expanded choice across visits.
+    Always open the sidebar on page load so new visitors see the five-page
+    navigation immediately.
+    """
+    from streamlit.components.v1 import html as components_html
+
+    components_html(
+        """
+        <script>
+          (function() {
+            const openSidebar = () => {
+              const doc = window.parent.document;
+              // If the "collapsed control" expand button exists, the sidebar
+              // is hidden — click it to re-open.
+              const expand = doc.querySelector(
+                '[data-testid="stSidebarCollapsedControl"] button, '
+                + '[data-testid="collapsedControl"] button'
+              );
+              if (expand) { expand.click(); return true; }
+              return false;
+            };
+            // Try a few times in case the DOM hasn't finished painting.
+            let tries = 0;
+            const iv = setInterval(() => {
+              if (openSidebar() || ++tries > 10) clearInterval(iv);
+            }, 150);
+          })();
+        </script>
+        """,
+        height=0,
+    )
 
 
 _GLOBAL_CSS = f"""
