@@ -1,2 +1,0 @@
-# System packages for Streamlit Community Cloud (apt-get).
-# No native deps required — duckdb, xgboost, and statsmodels ship manylinux wheels.
