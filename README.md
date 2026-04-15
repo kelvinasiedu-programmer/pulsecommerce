@@ -14,9 +14,9 @@ short_description: Ecommerce analytics — forecasting, churn, A/B testing
 > One unified warehouse. Five analytical layers. One coherent story that answers:
 > **Is the business healthy → where is it leaking → what's coming → who's leaving → what should we do?**
 
-### 🚀 [Live Demo → pulsecommerce.streamlit.app](https://pulsecommerce.streamlit.app/)
+### 🚀 [Live Demo → Hugging Face Space](https://huggingface.co/spaces/Kelvin-programmer/pulsecommerce)
 
-[![Live Demo](https://img.shields.io/badge/demo-live-success?logo=streamlit&logoColor=white)](https://pulsecommerce.streamlit.app/)
+[![Live Demo](https://img.shields.io/badge/demo-live-success?logo=huggingface&logoColor=white)](https://huggingface.co/spaces/Kelvin-programmer/pulsecommerce)
 [![CI](https://github.com/kelvinasiedu-programmer/pulsecommerce/actions/workflows/ci.yml/badge.svg)](https://github.com/kelvinasiedu-programmer/pulsecommerce/actions/workflows/ci.yml)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
