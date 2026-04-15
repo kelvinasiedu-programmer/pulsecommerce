@@ -71,22 +71,41 @@ def _force_sidebar_open() -> None:
         """
         <script>
           (function() {
+            const parentWin = window.parent;
+            const parentDoc = parentWin.document;
+
+            // Proactively clear any persisted collapsed-sidebar preference so
+            // initial_sidebar_state='expanded' is never overridden.
+            try {
+              ['streamlit:sidebarState', 'sidebarState'].forEach(k => {
+                parentWin.localStorage && parentWin.localStorage.removeItem(k);
+                parentWin.sessionStorage && parentWin.sessionStorage.removeItem(k);
+              });
+            } catch (e) {}
+
+            const isCollapsed = () => {
+              const sb = parentDoc.querySelector('section[data-testid="stSidebar"]');
+              return sb && sb.getAttribute('aria-expanded') === 'false';
+            };
             const openSidebar = () => {
-              const doc = window.parent.document;
-              // If the "collapsed control" expand button exists, the sidebar
-              // is hidden — click it to re-open.
-              const expand = doc.querySelector(
+              if (!isCollapsed()) return true;
+              const btn = parentDoc.querySelector(
                 '[data-testid="stSidebarCollapsedControl"] button, '
                 + '[data-testid="collapsedControl"] button'
               );
-              if (expand) { expand.click(); return true; }
+              if (btn) { btn.click(); return true; }
               return false;
             };
-            // Try a few times in case the DOM hasn't finished painting.
+
+            // Fire as early and often as possible until the sidebar is open.
             let tries = 0;
-            const iv = setInterval(() => {
-              if (openSidebar() || ++tries > 10) clearInterval(iv);
-            }, 150);
+            const attempt = () => {
+              if (openSidebar()) return;
+              if (++tries < 40) requestAnimationFrame(attempt);
+            };
+            attempt();
+            parentDoc.addEventListener('DOMContentLoaded', attempt);
+            parentWin.addEventListener('load', attempt);
           })();
         </script>
         """,
