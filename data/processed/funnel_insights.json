@@ -1,0 +1,17 @@
+{
+  "biggest_drop_stage": "product_view",
+  "biggest_drop_rate": 0.7105571293673276,
+  "worst_segment": {
+    "device": "tablet",
+    "channel": "Referral",
+    "overall_conversion": 0.06105610561056106,
+    "sessions": 3636
+  },
+  "best_segment": {
+    "device": "tablet",
+    "channel": "Direct",
+    "overall_conversion": 0.06863695090439277,
+    "sessions": 6192
+  },
+  "estimated_lost_revenue": 3482.917352493612
+}

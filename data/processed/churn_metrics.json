@@ -1,0 +1,9 @@
+{
+  "roc_auc_xgb": 0.8888888888888888,
+  "average_precision_xgb": 0.8414755112639528,
+  "roc_auc_logreg": 0.8796296296296297,
+  "train_rows": 90,
+  "test_rows": 30,
+  "churn_rate": 0.6166666666666667,
+  "snapshot": "2026-03-31"
+}
