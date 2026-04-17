@@ -85,4 +85,5 @@ jobs:
 | `No data found` banner on Home | Run `python -m pulsecommerce.cli all` before launching Streamlit |
 | `FileNotFoundError: .../users.parquet` | Same as above |
 | Streamlit port in use | `streamlit run dashboard/Home.py --server.port=8502` |
-| DuckDB lock | Kill other processes touching `data/warehouse/pulse.duckdb` or delete and rebuild |
+| DuckDB lock in OneDrive / Dropbox / iCloud | Set `PULSECOMMERCE_DATA_DIR` to a non-synced path like `C:\dev\pulsecommerce-data` before running `pulsecommerce all` |
+| Hugging Face subpage URL returns `_stcore/*` 404s | Open the Space root and navigate with the in-app page links instead of bookmarking raw subpage paths |

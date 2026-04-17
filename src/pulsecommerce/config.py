@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -14,17 +15,24 @@ def _repo_root() -> Path:
     return here.parents[3]
 
 
+def _env_path(name: str) -> Path | None:
+    value = os.getenv(name)
+    if not value:
+        return None
+    return Path(value).expanduser()
+
+
 REPO_ROOT: Path = _repo_root()
-DATA_DIR: Path = REPO_ROOT / "data"
+DATA_DIR: Path = _env_path("PULSECOMMERCE_DATA_DIR") or (REPO_ROOT / "data")
 RAW_DIR: Path = DATA_DIR / "raw"
 PROCESSED_DIR: Path = DATA_DIR / "processed"
-WAREHOUSE_DIR: Path = DATA_DIR / "warehouse"
 TABLEAU_DIR: Path = DATA_DIR / "tableau"
 SQL_DIR: Path = REPO_ROOT / "sql"
 SITE_DIR: Path = REPO_ROOT / "site"
 DASHBOARD_ASSETS: Path = REPO_ROOT / "dashboard" / "assets"
 MODELS_DIR: Path = DATA_DIR / "models"
-WAREHOUSE_PATH: Path = WAREHOUSE_DIR / "pulse.duckdb"
+WAREHOUSE_PATH: Path = _env_path("PULSECOMMERCE_WAREHOUSE_PATH") or (DATA_DIR / "warehouse" / "pulse.duckdb")
+WAREHOUSE_DIR: Path = WAREHOUSE_PATH.parent
 
 
 @dataclass(frozen=True)

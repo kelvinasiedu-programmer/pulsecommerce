@@ -57,6 +57,17 @@ streamlit run dashboard/Home.py
 
 Open `http://localhost:8501`. `docker compose up --build` works too.
 
+DuckDB and file-syncing folders don't mix - the lock file confuses OneDrive and
+Dropbox and you get intermittent corruption. If the repo lives in a synced
+folder, put the runtime data somewhere local first:
+
+```powershell
+$env:PULSECOMMERCE_DATA_DIR = "C:\dev\pulsecommerce-data"
+```
+
+`PULSECOMMERCE_WAREHOUSE_PATH` overrides the DuckDB file location on its own if
+you need finer control.
+
 For the Tableau side:
 
 ```bash
