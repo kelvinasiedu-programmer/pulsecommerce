@@ -19,6 +19,7 @@ from pulsecommerce.warehouse import Warehouse
 
 @dataclass
 class KPICard:
+    metric_id: str
     label: str
     value: float
     delta_abs: float
@@ -52,8 +53,11 @@ def _pct_delta(current: float, prior: float) -> float:
     return (current - prior) / prior
 
 
-def _card(label: str, current: float, prior: float, fmt: str = "number") -> KPICard:
+def _card(
+    metric_id: str, label: str, current: float, prior: float, fmt: str = "number"
+) -> KPICard:
     return KPICard(
+        metric_id=metric_id,
         label=label,
         value=float(current or 0.0),
         delta_abs=float((current or 0.0) - (prior or 0.0)),
@@ -112,23 +116,38 @@ class HealthAnalyst:
         prior = daily.loc[prior_mask]
 
         cards = [
-            _card("Revenue", cur["revenue"].sum(), prior["revenue"].sum(), "currency"),
-            _card("Gross Margin", cur["margin"].sum(), prior["margin"].sum(), "currency"),
-            _card("Orders", cur["orders"].sum(), prior["orders"].sum(), "number"),
-            _card("Sessions", cur["sessions"].sum(), prior["sessions"].sum(), "number"),
+            _card("revenue", "Revenue", cur["revenue"].sum(), prior["revenue"].sum(), "currency"),
             _card(
+                "gross_margin",
+                "Gross Margin",
+                cur["margin"].sum(),
+                prior["margin"].sum(),
+                "currency",
+            ),
+            _card("orders", "Orders", cur["orders"].sum(), prior["orders"].sum(), "number"),
+            _card(
+                "sessions",
+                "Sessions",
+                cur["sessions"].sum(),
+                prior["sessions"].sum(),
+                "number",
+            ),
+            _card(
+                "aov",
                 "AOV",
                 cur["revenue"].sum() / max(cur["orders"].sum(), 1),
                 prior["revenue"].sum() / max(prior["orders"].sum(), 1),
                 "currency",
             ),
             _card(
+                "conversion_rate",
                 "Conversion Rate",
                 cur["conversion_rate"].mean(),
                 prior["conversion_rate"].mean(),
                 "percent",
             ),
             _card(
+                "cancel_rate",
                 "Cancel Rate",
                 cur["cancelled_orders"].sum() / max(cur["orders"].sum(), 1),
                 prior["cancelled_orders"].sum() / max(prior["orders"].sum(), 1),

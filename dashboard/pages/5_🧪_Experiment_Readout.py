@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import sys
 from pathlib import Path
+from math import sqrt
 
 import pandas as pd
 import plotly.graph_objects as go
@@ -75,6 +76,26 @@ st.markdown("<div style='height: 18px;'></div>", unsafe_allow_html=True)
 # --------------------------------------------------------------------------- #
 primary = exp.get("primary", {})
 guardrails = exp.get("guardrails", [])
+control_n = int(exp.get("n_control", 0) or 0)
+treatment_n = int(exp.get("n_treatment", 0) or 0)
+control_mean = float(primary.get("control_mean", 0) or 0)
+treatment_mean = float(primary.get("treatment_mean", 0) or 0)
+
+ci_low = None
+ci_high = None
+if (
+    control_n > 0
+    and treatment_n > 0
+    and 0 <= control_mean <= 1
+    and 0 <= treatment_mean <= 1
+):
+    diff = treatment_mean - control_mean
+    se = sqrt(
+        (control_mean * (1 - control_mean) / control_n)
+        + (treatment_mean * (1 - treatment_mean) / treatment_n)
+    )
+    ci_low = diff - 1.96 * se
+    ci_high = diff + 1.96 * se
 
 left, right = st.columns([5, 7])
 
@@ -101,7 +122,7 @@ with left:
             {badge(sig_label, sig_tone)}
           </div>
           <div style="font-size:0.85rem; color:{COLORS['text_muted']}; margin-top:14px;">
-            Control mean: <b style="color:{COLORS['text']};">{primary.get('control_mean', 0):.4f}</b>
+            Control mean: <b style="color:{COLORS['text']};">{control_mean:.4f}</b>
             &nbsp;·&nbsp; Absolute lift: <b style="color:{COLORS['text']};">
                 {primary.get('abs_lift', 0):+.4f}</b>
           </div>
@@ -109,6 +130,10 @@ with left:
         """,
         unsafe_allow_html=True,
     )
+    if ci_low is not None and ci_high is not None:
+        st.caption(f"Approx. 95% CI for treatment-control difference: {ci_low:+.2%} to {ci_high:+.2%}")
+    if min(control_n, treatment_n) < 200:
+        st.info("Sample sizes are still small for a launch decision. Treat this readout as directional rather than conclusive.")
 
 with right:
     section("Relative lift - primary vs. guardrails", "Green = direction OK. Red = guardrail breach.")
