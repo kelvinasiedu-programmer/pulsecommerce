@@ -66,6 +66,7 @@ Thumbs.db
 .idea/
 *.swp
 *.swo
+.worktrees/
 
 # Secrets
 .env
