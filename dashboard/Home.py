@@ -655,7 +655,7 @@ for row_items in (nav_items[:3], nav_items[3:]):
                 """,
                 unsafe_allow_html=True,
             )
-            st.page_link(page_path, label=f"Open {title}", icon="→", use_container_width=True)
+            st.page_link(page_path, label=f"Open {title}", icon=icon, use_container_width=True)
 
 st.markdown("<div style='height: 22px;'></div>", unsafe_allow_html=True)
 footer_left, footer_right = st.columns([5, 7])
