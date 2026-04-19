@@ -26,8 +26,8 @@ COLORS = {
     "border": "#E5E7EB",
     "border_strong": "#D1D5DB",
     "text": "#0F172A",
-    "text_muted": "#64748B",
-    "text_subtle": "#94A3B8",
+    "text_muted": "#475569",
+    "text_subtle": "#64748B",
     # Status
     "success": "#10B981",
     "success_bg": "#ECFDF5",
@@ -57,60 +57,6 @@ def apply_theme(page_title: str, page_icon: str) -> None:
         initial_sidebar_state="expanded",
     )
     st.markdown(_GLOBAL_CSS, unsafe_allow_html=True)
-    _force_sidebar_open()
-
-
-def _force_sidebar_open() -> None:
-    """Streamlit remembers the user's collapsed/expanded choice across visits.
-    Always open the sidebar on page load so new visitors see the five-page
-    navigation immediately.
-    """
-    from streamlit.components.v1 import html as components_html
-
-    components_html(
-        """
-        <script>
-          (function() {
-            const parentWin = window.parent;
-            const parentDoc = parentWin.document;
-
-            // Proactively clear any persisted collapsed-sidebar preference so
-            // initial_sidebar_state='expanded' is never overridden.
-            try {
-              ['streamlit:sidebarState', 'sidebarState'].forEach(k => {
-                parentWin.localStorage && parentWin.localStorage.removeItem(k);
-                parentWin.sessionStorage && parentWin.sessionStorage.removeItem(k);
-              });
-            } catch (e) {}
-
-            const isCollapsed = () => {
-              const sb = parentDoc.querySelector('section[data-testid="stSidebar"]');
-              return sb && sb.getAttribute('aria-expanded') === 'false';
-            };
-            const openSidebar = () => {
-              if (!isCollapsed()) return true;
-              const btn = parentDoc.querySelector(
-                '[data-testid="stSidebarCollapsedControl"] button, '
-                + '[data-testid="collapsedControl"] button'
-              );
-              if (btn) { btn.click(); return true; }
-              return false;
-            };
-
-            // Fire as early and often as possible until the sidebar is open.
-            let tries = 0;
-            const attempt = () => {
-              if (openSidebar()) return;
-              if (++tries < 40) requestAnimationFrame(attempt);
-            };
-            attempt();
-            parentDoc.addEventListener('DOMContentLoaded', attempt);
-            parentWin.addEventListener('load', attempt);
-          })();
-        </script>
-        """,
-        height=0,
-    )
 
 
 _GLOBAL_CSS = f"""

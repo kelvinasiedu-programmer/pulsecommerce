@@ -1,15 +1,13 @@
-"""PulseCommerce — executive landing dashboard.
+"""PulseCommerce — overview dashboard.
 
-Inspired-by: rich greeting header + icon KPI tiles + insights chart + gauge +
-category stripe + transactions-style table — adapted to the PulseCommerce
-analytics artifacts.
+Summarizes the trailing-28-day state of the synthetic store across the five
+analytical layers, with drill-through links into each page.
 """
 
 from __future__ import annotations
 
 import json
 import sys
-from datetime import datetime
 from pathlib import Path
 
 import pandas as pd
@@ -80,20 +78,35 @@ st.markdown(
     <style>
       .hp-welcome {{
         display: flex; justify-content: space-between; align-items: center;
-        padding: 4px 2px 20px 2px;
+        padding: 4px 2px 20px 2px; gap: 16px; flex-wrap: wrap;
+      }}
+      .hp-eyebrow {{
+        font-size: 0.72rem; font-weight: 600; color: {COLORS['primary']};
+        text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px;
       }}
       .hp-hi {{ font-size: 1.6rem; font-weight: 700; color: {COLORS['text']};
-                letter-spacing: -0.02em; margin-bottom: 2px; }}
-      .hp-sub {{ font-size: 0.9rem; color: {COLORS['text_muted']}; }}
-      .hp-actions {{ display: flex; gap: 10px; }}
+                letter-spacing: -0.02em; margin-bottom: 4px; }}
+      .hp-sub {{ font-size: 0.9rem; color: {COLORS['text_muted']}; max-width: 56ch; }}
+      .hp-actions {{ display: flex; gap: 10px; flex-wrap: wrap; }}
+
+      /* Pills: both variants meet WCAG 2.5.5 AA (44px minimum touch target) */
       .hp-pill {{
         background: {COLORS['surface']}; border: 1px solid {COLORS['border']};
-        border-radius: 10px; padding: 8px 14px; font-size: 0.82rem;
+        border-radius: 10px; padding: 10px 14px; font-size: 0.82rem;
         font-weight: 500; color: {COLORS['text']};
-        display:inline-flex; align-items:center; gap:8px;
+        display: inline-flex; align-items: center; gap: 8px;
+        min-height: 44px; box-sizing: border-box;
       }}
-      .hp-pill.primary {{
-        background: {COLORS['primary']}; color: white; border-color: {COLORS['primary']};
+      .hp-pill-link {{
+        text-decoration: none; transition: border-color 0.15s, background 0.15s;
+      }}
+      .hp-pill-link:hover {{
+        border-color: {COLORS['primary']};
+        background: {COLORS['primary_light']};
+      }}
+      .hp-pill-link:focus-visible {{
+        outline: 2px solid {COLORS['primary']};
+        outline-offset: 2px;
       }}
 
       .hp-kpigrid {{
@@ -105,16 +118,20 @@ st.markdown(
         border-radius: 14px; padding: 18px 20px;
         box-shadow: 0 1px 2px rgba(15,23,42,0.04);
         display: flex; gap: 14px; align-items: flex-start;
+        margin: 0;
       }}
+      .hp-kpi dt, .hp-kpi dd {{ margin: 0; }}
       .hp-kpi .ic {{
         width: 44px; height: 44px; border-radius: 12px;
         display: flex; align-items: center; justify-content: center;
-        font-size: 1.25rem; flex-shrink: 0;
+        flex-shrink: 0;
       }}
-      .hp-kpi .ic.indigo  {{ background: #EEF2FF; color: #4338CA; }}
-      .hp-kpi .ic.emerald {{ background: #ECFDF5; color: #047857; }}
-      .hp-kpi .ic.amber   {{ background: #FFFBEB; color: #B45309; }}
-      .hp-kpi .ic.sky     {{ background: #EFF6FF; color: #1D4ED8; }}
+      .hp-kpi .ic svg {{ width: 22px; height: 22px; }}
+      /* Icon tones — derived palette; kept as a documented secondary scale */
+      .hp-kpi .ic.indigo  {{ background: {COLORS['primary_light']}; color: {COLORS['primary_dark']}; }}
+      .hp-kpi .ic.emerald {{ background: {COLORS['success_bg']}; color: #047857; }}
+      .hp-kpi .ic.amber   {{ background: {COLORS['warning_bg']}; color: #B45309; }}
+      .hp-kpi .ic.sky     {{ background: {COLORS['info_bg']}; color: #1D4ED8; }}
       .hp-kpi .ic.pink    {{ background: #FDF2F8; color: #BE185D; }}
       .hp-kpi .ic.violet  {{ background: #F5F3FF; color: #6D28D9; }}
       .hp-kpi .ic.slate   {{ background: #F1F5F9; color: #334155; }}
@@ -124,15 +141,22 @@ st.markdown(
       }}
       .hp-kpi .val {{
         font-size: 1.5rem; font-weight: 700; color: {COLORS['text']};
-        letter-spacing: -0.02em; margin: 2px 0 4px 0; line-height: 1.1;
+        letter-spacing: -0.02em; margin: 2px 0 6px 0; line-height: 1.1;
       }}
+      /* Delta chip: direction communicated via three redundant channels — color,
+         arrow glyph, and the word "up"/"down" — so color-blind users and
+         screen-reader users get the same information. */
       .hp-kpi .chip {{
-        display: inline-flex; align-items:center; gap:4px;
-        font-size: 0.72rem; font-weight: 600; padding: 2px 8px;
+        display: inline-flex; align-items: center; gap: 4px;
+        font-size: 0.75rem; font-weight: 700; padding: 3px 9px;
         border-radius: 999px;
       }}
-      .hp-kpi .chip.up   {{ background: #ECFDF5; color: #047857; }}
-      .hp-kpi .chip.down {{ background: #FEF2F2; color: #B91C1C; }}
+      .hp-kpi .chip .arrow {{ font-size: 0.9rem; line-height: 1; }}
+      .hp-kpi .chip.up   {{ background: {COLORS['success_bg']}; color: #047857; }}
+      .hp-kpi .chip.down {{ background: {COLORS['danger_bg']}; color: #B91C1C; }}
+      .hp-kpi .vs {{
+        font-size: 0.72rem; color: {COLORS['text_muted']}; margin-left: 6px;
+      }}
 
       .hp-panel {{
         background: {COLORS['surface']}; border: 1px solid {COLORS['border']};
@@ -144,16 +168,6 @@ st.markdown(
         margin: 0 0 4px 0;
       }}
       .hp-panel .sub {{ font-size: 0.82rem; color: {COLORS['text_muted']}; }}
-      .hp-seg {{
-        display: inline-flex; background: #F1F5F9; border-radius: 10px;
-        padding: 3px; gap: 2px; margin-top: 4px;
-      }}
-      .hp-seg span {{
-        font-size: 0.78rem; padding: 5px 12px; border-radius: 8px;
-        color: {COLORS['text_muted']}; font-weight: 500;
-      }}
-      .hp-seg span.on {{ background: white; color: {COLORS['text']};
-                        box-shadow: 0 1px 2px rgba(15,23,42,0.06); }}
 
       .hp-cat-stripe {{
         display: flex; border-radius: 12px; overflow: hidden; height: 38px;
@@ -179,22 +193,22 @@ st.markdown(
       .hp-cat-leg-val {{ color: {COLORS['text']}; font-weight: 600; }}
 
       .hp-verdict-pill {{
-        display:inline-flex; align-items:center; gap:8px;
+        display: inline-flex; align-items: center; gap: 8px;
         padding: 6px 12px; border-radius: 999px; font-weight: 600;
         font-size: 0.82rem;
       }}
-      .hp-verdict-pill.ship    {{ background:#ECFDF5; color:#065F46; }}
-      .hp-verdict-pill.iterate {{ background:#FFFBEB; color:#92400E; }}
-      .hp-verdict-pill.reject  {{ background:#FEF2F2; color:#991B1B; }}
+      .hp-verdict-pill.ship    {{ background: {COLORS['success_bg']}; color: #065F46; }}
+      .hp-verdict-pill.iterate {{ background: {COLORS['warning_bg']}; color: #92400E; }}
+      .hp-verdict-pill.reject  {{ background: {COLORS['danger_bg']}; color: #991B1B; }}
 
       .hp-row {{
-        display:flex; justify-content:space-between; align-items:center;
-        padding:10px 2px; border-bottom:1px solid {COLORS['border']};
+        display: flex; justify-content: space-between; align-items: center;
+        padding: 10px 2px; border-bottom: 1px solid {COLORS['border']};
       }}
       .hp-row:last-child {{ border-bottom: none; }}
-      .hp-row .nm {{ font-weight:500; color:{COLORS['text']}; font-size:0.88rem; }}
-      .hp-row .su {{ font-size:0.76rem; color:{COLORS['text_muted']}; }}
-      .hp-row .vl {{ font-weight:600; color:{COLORS['text']}; font-size:0.88rem; }}
+      .hp-row .nm {{ font-weight: 500; color: {COLORS['text']}; font-size: 0.88rem; }}
+      .hp-row .su {{ font-size: 0.76rem; color: {COLORS['text_muted']}; }}
+      .hp-row .vl {{ font-weight: 600; color: {COLORS['text']}; font-size: 0.88rem; }}
     </style>
     """,
     unsafe_allow_html=True,
@@ -202,22 +216,37 @@ st.markdown(
 
 
 # --------------------------------------------------------------------------- #
-# Welcome header (greeting + actions)
+# Header — honest portfolio framing (no fake CTAs, no greeting copy)
 # --------------------------------------------------------------------------- #
-hour = datetime.now().hour
-greeting = "Good morning" if hour < 12 else "Good afternoon" if hour < 18 else "Good evening"
-today = datetime.now().strftime("%A, %d %B %Y")
+days_of_history = len(daily) if not daily.empty else 0
 
 st.markdown(
     f"""
     <div class="hp-welcome">
       <div>
-        <div class="hp-hi">{greeting}, Kelvin 👋</div>
-        <div class="hp-sub">Here's how your commerce is performing over the trailing 28 days · {today}</div>
+        <div class="hp-eyebrow">Portfolio project · synthetic dataset</div>
+        <div class="hp-hi">PulseCommerce Overview</div>
+        <div class="hp-sub">Trailing 28-day state of the store, summarized across the five analytical layers.</div>
       </div>
       <div class="hp-actions">
-        <span class="hp-pill">📅 This Month</span>
-        <span class="hp-pill primary">📥 Export</span>
+        <span class="hp-pill" aria-label="Data window">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2" stroke-linecap="round"
+               stroke-linejoin="round" aria-hidden="true">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
+          {days_of_history} days of history
+        </span>
+        <a class="hp-pill hp-pill-link" href="https://github.com/kelvinasiedu-programmer/pulsecommerce"
+           target="_blank" rel="noopener noreferrer" aria-label="Open source repository on GitHub">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M12 .5C5.73.5.5 5.73.5 12a11.5 11.5 0 0 0 7.86 10.93c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.36-3.88-1.36-.52-1.32-1.27-1.67-1.27-1.67-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.18 1.76 1.18 1.02 1.75 2.68 1.24 3.34.95.1-.74.4-1.25.73-1.54-2.56-.29-5.25-1.28-5.25-5.7 0-1.26.45-2.29 1.18-3.1-.12-.3-.51-1.46.11-3.05 0 0 .96-.31 3.15 1.18a10.97 10.97 0 0 1 5.74 0c2.19-1.49 3.15-1.18 3.15-1.18.62 1.59.23 2.75.11 3.05.74.81 1.18 1.84 1.18 3.1 0 4.43-2.69 5.4-5.26 5.69.41.35.78 1.05.78 2.12v3.14c0 .31.21.67.8.56A11.5 11.5 0 0 0 23.5 12C23.5 5.73 18.27.5 12 .5z"/>
+          </svg>
+          GitHub
+        </a>
       </div>
     </div>
     """,
@@ -236,14 +265,33 @@ def _fmt(value: float, fmt: str) -> str:
     return f"{value:,.0f}"
 
 
+_SVG = (
+    '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" '
+    'stroke="currentColor" stroke-width="2" stroke-linecap="round" '
+    'stroke-linejoin="round" aria-hidden="true">{}</svg>'
+)
 kpi_icons = {
-    "revenue": ("💰", "indigo"),
-    "gross_margin": ("📈", "emerald"),
-    "orders": ("📦", "sky"),
-    "sessions": ("👥", "violet"),
-    "aov": ("💳", "amber"),
-    "conversion_rate": ("🎯", "pink"),
-    "cancel_rate": ("⚠️", "slate"),
+    "revenue": (_SVG.format('<line x1="12" y1="1" x2="12" y2="23"/>'
+                            '<path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>'),
+                "indigo"),
+    "gross_margin": (_SVG.format('<polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>'
+                                 '<polyline points="17 6 23 6 23 12"/>'), "emerald"),
+    "orders": (_SVG.format('<path d="M16.5 9.4l-9-5.19"/>'
+                           '<path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>'
+                           '<polyline points="3.27 6.96 12 12.01 20.73 6.96"/>'
+                           '<line x1="12" y1="22.08" x2="12" y2="12"/>'), "sky"),
+    "sessions": (_SVG.format('<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>'
+                             '<circle cx="9" cy="7" r="4"/>'
+                             '<path d="M23 21v-2a4 4 0 0 0-3-3.87"/>'
+                             '<path d="M16 3.13a4 4 0 0 1 0 7.75"/>'), "violet"),
+    "aov": (_SVG.format('<rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>'
+                        '<line x1="1" y1="10" x2="23" y2="10"/>'), "amber"),
+    "conversion_rate": (_SVG.format('<circle cx="12" cy="12" r="10"/>'
+                                    '<circle cx="12" cy="12" r="6"/>'
+                                    '<circle cx="12" cy="12" r="2"/>'), "pink"),
+    "cancel_rate": (_SVG.format('<circle cx="12" cy="12" r="10"/>'
+                                '<line x1="12" y1="8" x2="12" y2="12"/>'
+                                '<line x1="12" y1="16" x2="12.01" y2="16"/>'), "slate"),
 }
 
 # Pick the 4 headline KPIs
@@ -257,25 +305,30 @@ if id_col:
 else:
     headline = [cards.iloc[i] for i in range(min(4, len(cards)))]
 
-kpi_html = '<div class="hp-kpigrid">'
+kpi_html = '<div class="hp-kpigrid" role="list">'
 for row in headline:
     key = row[id_col] if id_col else row["label"].lower().replace(" ", "_")
-    icon, tone = kpi_icons.get(key, ("✨", "indigo"))
+    icon, tone = kpi_icons.get(key, (_SVG.format('<circle cx="12" cy="12" r="10"/>'), "indigo"))
     val = _fmt(row["value"], row["format"])
     delta = row["delta_pct"]
     chip_cls = "up" if delta >= 0 else "down"
     arrow = "↑" if delta >= 0 else "↓"
+    direction = "up" if delta >= 0 else "down"
     kpi_html += (
-        f'<div class="hp-kpi">'
-        f'  <div class="ic {tone}">{icon}</div>'
+        f'<dl class="hp-kpi" role="listitem" aria-label="{row["label"]}: {val}">'
+        f'  <div class="ic {tone}" aria-hidden="true">{icon}</div>'
         f'  <div style="flex:1; min-width:0;">'
-        f'    <div class="lbl">{row["label"]}</div>'
-        f'    <div class="val">{val}</div>'
-        f'    <span class="chip {chip_cls}">{arrow} {abs(delta) * 100:.1f}%</span>'
-        f'    <span style="font-size:0.72rem; color:{COLORS["text_muted"]}; margin-left:6px;">'
-        f'vs. prior period</span>'
+        f'    <dt class="lbl">{row["label"]}</dt>'
+        f'    <dd class="val">{val}</dd>'
+        f'    <dd>'
+        f'      <span class="chip {chip_cls}">'
+        f'        <span class="arrow" aria-hidden="true">{arrow}</span> '
+        f'{direction} {abs(delta) * 100:.1f}%'
+        f'      </span>'
+        f'      <span class="vs">vs. prior period</span>'
+        f'    </dd>'
         f'  </div>'
-        f'</div>'
+        f'</dl>'
     )
 kpi_html += "</div>"
 st.markdown(kpi_html, unsafe_allow_html=True)
@@ -290,17 +343,8 @@ with left:
     st.markdown(
         """
         <div class="hp-panel">
-          <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-            <div>
-              <h4>Revenue insights</h4>
-              <div class="sub">Daily revenue with the peak-performing day highlighted.</div>
-            </div>
-            <div class="hp-seg">
-              <span>Weekly</span>
-              <span class="on">Daily</span>
-              <span>Monthly</span>
-            </div>
-          </div>
+          <h4>Revenue insights</h4>
+          <div class="sub">Daily revenue with the peak-performing day highlighted.</div>
         </div>
         """,
         unsafe_allow_html=True,
@@ -353,8 +397,8 @@ with right:
         conv_row = cards_by_key["conversion_rate"]
     conv_val = float(conv_row["value"]) if conv_row is not None else 0.0
     conv_pct = conv_val * 100
-    target = 3.5  # visual target; purely for the gauge backing
-    gauge_filled = min(conv_pct / max(target, conv_pct + 1), 1.0)
+    target = 3.5  # visual target for the gauge backing
+    gauge_filled = min(conv_pct / target, 1.0) if target > 0 else 0.0
 
     fig_d = go.Figure(go.Pie(
         values=[gauge_filled, 1 - gauge_filled],
@@ -362,7 +406,8 @@ with right:
         sort=False,
         direction="clockwise",
         rotation=180,
-        marker=dict(colors=[COLORS["primary"], "#EEF2FF"], line=dict(color="white", width=0)),
+        marker=dict(colors=[COLORS["primary"], COLORS["primary_light"]],
+                    line=dict(color="white", width=0)),
         textinfo="none", hoverinfo="skip",
     ))
     fig_d.update_layout(
@@ -483,14 +528,19 @@ with bottom_left:
             status_ok = row["revenue"] >= target_rev
             status_cls = "up" if status_ok else "down"
             status_label = "Above median" if status_ok else "Below median"
-            chip_bg, chip_fg = ("#ECFDF5", "#047857") if status_ok else ("#FEF2F2", "#B91C1C")
+            chip_bg, chip_fg = (
+                (COLORS["success_bg"], "#065F46") if status_ok
+                else (COLORS["danger_bg"], "#991B1B")
+            )
             st.markdown(
                 f"""
                 <div class="hp-row">
                   <div style="display:flex; gap:12px; align-items:center;">
-                    <div style="width:36px; height:36px; border-radius:10px; background:#EEF2FF;
+                    <div style="width:36px; height:36px; border-radius:10px;
+                                background:{COLORS['primary_light']};
                                 display:flex; align-items:center; justify-content:center;
-                                font-weight:700; color:#4338CA; font-size:0.78rem;">
+                                font-weight:700; color:{COLORS['primary_dark']};
+                                font-size:0.78rem;">
                       {row['metric_date'].strftime('%d')}
                     </div>
                     <div>
