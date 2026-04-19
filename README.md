@@ -9,10 +9,13 @@ pinned: false
 short_description: Ecommerce analytics — forecasting, churn, A/B testing
 ---
 
-# 📈 PulseCommerce — End-to-End SMB Commerce Intelligence Platform
+# 📈 PulseCommerce — Commerce Analytics Platform
 
-> One unified warehouse. Five analytical layers. One coherent story that answers:
-> **Is the business healthy → where is it leaking → what's coming → who's leaving → what should we do?**
+> A portfolio analytics platform that turns a synthetic ecommerce dataset into five connected answers:
+> business health, funnel drop-off, demand forecast, churn risk, and experiment readout.
+> Built so each layer feeds the next — a flagged KPI anomaly finds its location in the funnel, its
+> at-risk population in the churn model, its revenue exposure in the forecast, and its intervention
+> test in the experiment page.
 
 ### 🚀 [Live Demo → kelvin-programmer-pulsecommerce.hf.space](https://kelvin-programmer-pulsecommerce.hf.space)
 
@@ -36,7 +39,7 @@ PulseCommerce is a production-styled analytics platform for a fictional small-to
 | 4 | **Churn Risk** | Who's about to leave? | RFM features, logistic + XGBoost, ROC-AUC, cohort retention |
 | 5 | **Experiment Readout** | Did the intervention work? | Simulated A/B, Welch t-test, guardrail metrics, ship/iterate/reject |
 
-The narrative: *the dashboard flags a conversion drop → the funnel page localizes it → the churn model identifies who's at risk → the forecast quantifies revenue at stake → the experiment page delivers a ship-ready readout.*
+Each layer is built on the same DuckDB warehouse and joins back to a single KPI dictionary, so "revenue" means the same number in the churn page as it does on the home dashboard.
 
 ---
 
@@ -197,17 +200,6 @@ A ready-to-use deployment workflow is documented in [`docs/DEPLOY.md`](docs/DEPL
 - [`docs/methodology.md`](docs/methodology.md) — modeling choices, backtest protocol, guardrail philosophy
 - [`docs/executive_memo.md`](docs/executive_memo.md) — 1-page stakeholder readout
 - [`docs/DEPLOY.md`](docs/DEPLOY.md) — deployment runbook
-
----
-
-## 📋 Resume bullets
-
-> **PulseCommerce — End-to-end SMB commerce intelligence platform** *(Python · SQL · DuckDB · scikit-learn · XGBoost · Streamlit · Docker)*
-> - Built a unified analytics platform on 450k+ ecommerce events and 95k orders spanning KPI reporting, funnel analysis, demand forecasting, churn prediction, and experiment readouts
-> - Designed a layered SQL warehouse (staging → marts → metrics) producing a single source of truth consumed by 4 downstream analytical modules
-> - Implemented weekly demand forecasting with Seasonal-Naive, Holt-Winters, and XGBoost models; selected winners per category via walk-forward MAPE backtesting
-> - Trained a churn-risk model (ROC-AUC ~0.85) on RFM + behavioral + cohort features, and fed high-risk customers into a simulated A/B experiment with Welch t-tests and guardrail metrics
-> - Delivered a 5-page Streamlit dashboard, Dockerized runtime, GitHub Actions CI, and a KPI dictionary — connecting predictive outputs to concrete product, marketing, and ops actions
 
 ---
 
