@@ -34,9 +34,6 @@ class ForecastResult:
     chosen_model: str
 
 
-# --------------------------------------------------------------------------- #
-# Feature engineering
-# --------------------------------------------------------------------------- #
 def _make_features(series: pd.Series) -> pd.DataFrame:
     df = series.to_frame("y").copy()
     df["week_of_year"] = df.index.isocalendar().week.astype(int)
@@ -60,9 +57,6 @@ def _mape(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     return float(np.mean(np.abs((y_true[mask] - y_pred[mask]) / y_true[mask])))
 
 
-# --------------------------------------------------------------------------- #
-# Model wrappers
-# --------------------------------------------------------------------------- #
 def _fit_seasonal_naive(series: pd.Series, horizon: int) -> np.ndarray:
     if len(series) < 52:
         tail = series.tail(horizon).to_numpy()
@@ -122,9 +116,6 @@ def _fit_xgb(series: pd.Series, horizon: int) -> np.ndarray:
     return np.array(preds)
 
 
-# --------------------------------------------------------------------------- #
-# Orchestration
-# --------------------------------------------------------------------------- #
 class DemandForecaster:
     def __init__(self, warehouse: Warehouse, horizon_weeks: int = FORECAST.horizon_weeks):
         self.wh = warehouse

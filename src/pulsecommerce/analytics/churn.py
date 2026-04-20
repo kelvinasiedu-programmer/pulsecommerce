@@ -58,9 +58,6 @@ class ChurnModel:
         self.wh = warehouse
         self.cfg = cfg
 
-    # --------------------------------------------------------------------- #
-    # Data preparation
-    # --------------------------------------------------------------------- #
     def _snapshot_date(self) -> date:
         df = self.wh.query("SELECT MAX(order_date) AS d FROM fct_orders")
         return pd.to_datetime(df.loc[0, "d"]).date()
@@ -155,9 +152,6 @@ class ChurnModel:
         df["recency_days"] = df["recency_days"].fillna(df["tenure_days"])
         return df
 
-    # --------------------------------------------------------------------- #
-    # Training
-    # --------------------------------------------------------------------- #
     def _build_pipeline(self) -> Pipeline:
         pre = ColumnTransformer(
             transformers=[
@@ -296,9 +290,6 @@ class ChurnModel:
             feature_importance=importance_df,
         )
 
-    # --------------------------------------------------------------------- #
-    # Cohort retention
-    # --------------------------------------------------------------------- #
     def _cohort_retention(self, snapshot: date) -> pd.DataFrame:
         df = self.wh.query(
             """

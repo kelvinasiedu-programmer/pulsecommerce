@@ -11,9 +11,6 @@ from typing import Any, Sequence
 import plotly.graph_objects as go
 import streamlit as st
 
-# --------------------------------------------------------------------------- #
-# Design tokens
-# --------------------------------------------------------------------------- #
 COLORS = {
     # Brand
     "primary": "#4F46E5",          # Indigo
@@ -45,9 +42,6 @@ SEQ_TEAL = ["#F0FDFA", "#CCFBF1", "#99F6E4", "#5EEAD4", "#2DD4BF", "#14B8A6", "#
 CATEGORICAL = ["#4F46E5", "#0EA5E9", "#10B981", "#F59E0B", "#EC4899", "#8B5CF6", "#14B8A6", "#F97316"]
 
 
-# --------------------------------------------------------------------------- #
-# Global CSS + page config
-# --------------------------------------------------------------------------- #
 def apply_theme(page_title: str, page_icon: str) -> None:
     """Call once at the top of every page."""
     st.set_page_config(
@@ -438,9 +432,6 @@ _GLOBAL_CSS = f"""
 """
 
 
-# --------------------------------------------------------------------------- #
-# Plotly helpers
-# --------------------------------------------------------------------------- #
 def plotly_layout(**overrides: Any) -> dict[str, Any]:
     """Return a clean white-theme layout dict for Plotly figures."""
     base: dict[str, Any] = dict(
@@ -477,9 +468,6 @@ def style_fig(fig: go.Figure, **overrides: Any) -> go.Figure:
     return fig
 
 
-# --------------------------------------------------------------------------- #
-# Reusable UI components
-# --------------------------------------------------------------------------- #
 def hero(eyebrow: str, title: str, subtitle: str) -> None:
     st.markdown(
         f"""

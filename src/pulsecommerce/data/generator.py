@@ -32,9 +32,6 @@ from pulsecommerce.logging_utils import get_logger
 logger = get_logger(__name__)
 
 
-# --------------------------------------------------------------------------- #
-# Helpers
-# --------------------------------------------------------------------------- #
 def _seasonality_multiplier(date: pd.Timestamp) -> float:
     """Yearly + weekly pattern. Peaks in Nov/Dec and on weekends."""
     day_of_year = date.dayofyear
@@ -75,9 +72,6 @@ class GeneratedDataset:
         }
 
 
-# --------------------------------------------------------------------------- #
-# Individual table generators
-# --------------------------------------------------------------------------- #
 def _generate_users(cfg: DataGenConfig, rng: np.random.Generator, fake: Faker) -> pd.DataFrame:
     start = pd.Timestamp(cfg.start_date)
     end = pd.Timestamp(cfg.end_date)
@@ -290,9 +284,6 @@ def _normalize(weights: list[float]) -> list[float]:
     return [w / total for w in weights]
 
 
-# --------------------------------------------------------------------------- #
-# Public API
-# --------------------------------------------------------------------------- #
 def generate(cfg: DataGenConfig | None = None, seed: int = 42) -> GeneratedDataset:
     cfg = cfg or DATA_GEN
     ensure_dirs()
