@@ -54,9 +54,6 @@ class Warehouse:
         self.path = Path(path) if path is not None else WAREHOUSE_PATH
         self.conn: duckdb.DuckDBPyConnection | None = None
 
-    # ------------------------------------------------------------------ #
-    # Lifecycle
-    # ------------------------------------------------------------------ #
     def connect(self) -> duckdb.DuckDBPyConnection:
         if self.conn is None:
             ensure_dirs()
@@ -76,9 +73,6 @@ class Warehouse:
     def __exit__(self, exc_type, exc, tb) -> None:
         self.close()
 
-    # ------------------------------------------------------------------ #
-    # Build
-    # ------------------------------------------------------------------ #
     def build(self, raw_dir: Path | None = None, sql_dir: Path | None = None) -> None:
         """(Re)build the warehouse from the raw parquet files."""
         raw_dir = raw_dir or RAW_DIR
@@ -124,9 +118,6 @@ class Warehouse:
                 logger.error("failed running %s: %s", sql_path, exc)
                 raise
 
-    # ------------------------------------------------------------------ #
-    # Querying helpers
-    # ------------------------------------------------------------------ #
     def query(self, sql: str, params: Sequence[Any] | None = None) -> pd.DataFrame:
         conn = self.connect()
         if params is None:

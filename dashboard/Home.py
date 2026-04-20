@@ -27,9 +27,6 @@ apply_theme("Overview", "📈")
 sidebar_brand()
 
 
-# --------------------------------------------------------------------------- #
-# Cold-start bootstrap
-# --------------------------------------------------------------------------- #
 def _ensure_bootstrapped() -> None:
     if (PROCESSED_DIR / "kpi_cards.parquet").exists():
         return
@@ -42,9 +39,6 @@ def _ensure_bootstrapped() -> None:
 _ensure_bootstrapped()
 
 
-# --------------------------------------------------------------------------- #
-# Data loaders
-# --------------------------------------------------------------------------- #
 @st.cache_data(show_spinner=False)
 def load_parquet(name: str) -> pd.DataFrame:
     path = PROCESSED_DIR / f"{name}.parquet"
@@ -70,9 +64,6 @@ if cards.empty:
     st.stop()
 
 
-# --------------------------------------------------------------------------- #
-# Home-specific CSS
-# --------------------------------------------------------------------------- #
 st.markdown(
     f"""
     <style>
@@ -215,9 +206,6 @@ st.markdown(
 )
 
 
-# --------------------------------------------------------------------------- #
-# Header — honest portfolio framing (no fake CTAs, no greeting copy)
-# --------------------------------------------------------------------------- #
 days_of_history = len(daily) if not daily.empty else 0
 
 st.markdown(
@@ -254,9 +242,6 @@ st.markdown(
 )
 
 
-# --------------------------------------------------------------------------- #
-# Icon KPI tiles (4 headline metrics)
-# --------------------------------------------------------------------------- #
 def _fmt(value: float, fmt: str) -> str:
     if fmt == "currency":
         return f"${value:,.0f}"
@@ -334,9 +319,6 @@ kpi_html += "</div>"
 st.markdown(kpi_html, unsafe_allow_html=True)
 
 
-# --------------------------------------------------------------------------- #
-# Revenue Insights + Sales Performance (2-col)
-# --------------------------------------------------------------------------- #
 left, right = st.columns([7, 5])
 
 with left:
@@ -457,9 +439,6 @@ with right:
     )
 
 
-# --------------------------------------------------------------------------- #
-# Category revenue stripe (Financia-style colored band)
-# --------------------------------------------------------------------------- #
 if not by_category.empty:
     cat = by_category.sort_values("revenue", ascending=False).copy()
     total = float(cat["revenue"].sum())
@@ -499,9 +478,6 @@ if not by_category.empty:
     )
 
 
-# --------------------------------------------------------------------------- #
-# Top performing days (transaction-style table) + Funnel + Verdict
-# --------------------------------------------------------------------------- #
 bottom_left, bottom_right = st.columns([7, 5])
 
 with bottom_left:
@@ -631,9 +607,6 @@ with bottom_right:
     )
 
 
-# --------------------------------------------------------------------------- #
-# Navigation grid
-# --------------------------------------------------------------------------- #
 st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
 st.markdown(
     f"""

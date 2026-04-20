@@ -54,9 +54,6 @@ hero(
 )
 
 
-# --------------------------------------------------------------------------- #
-# KPI strip
-# --------------------------------------------------------------------------- #
 def _fmt(value: float, fmt: str) -> str:
     if fmt == "currency":
         return f"${value:,.0f}"
@@ -78,9 +75,6 @@ kpi_row(items)
 
 st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
 
-# --------------------------------------------------------------------------- #
-# Tabs: Trends · Channel · Category
-# --------------------------------------------------------------------------- #
 tab_trend, tab_channel, tab_category = st.tabs(["📈 Trends", "📡 Channel mix", "🗂️ Category mix"])
 
 daily["metric_date"] = pd.to_datetime(daily["metric_date"])
@@ -185,9 +179,6 @@ with tab_category:
         st.dataframe(by_category, use_container_width=True, hide_index=True)
 
 
-# --------------------------------------------------------------------------- #
-# Footnote
-# --------------------------------------------------------------------------- #
 st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
 st.caption(
     "Next — **Funnel Drop-off** localizes where conversion is leaking; "
