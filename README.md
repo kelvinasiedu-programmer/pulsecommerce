@@ -9,200 +9,139 @@ pinned: false
 short_description: Ecommerce analytics — forecasting, churn, A/B testing
 ---
 
-# 📈 PulseCommerce — Commerce Analytics Platform
+# PulseCommerce
 
-> A portfolio analytics platform that turns a synthetic ecommerce dataset into five connected answers:
-> business health, funnel drop-off, demand forecast, churn risk, and experiment readout.
-> Built so each layer feeds the next — a flagged KPI anomaly finds its location in the funnel, its
-> at-risk population in the churn model, its revenue exposure in the forecast, and its intervention
-> test in the experiment page.
+A portfolio analytics app that takes a synthetic ecommerce dataset and works
+through five questions on top of it: is the business healthy, where does the
+funnel leak, what does demand look like next, who is about to churn, and did
+the last A/B test actually move the needle.
 
-### 🚀 [Live Demo → kelvin-programmer-pulsecommerce.hf.space](https://kelvin-programmer-pulsecommerce.hf.space)
+Live demo: [kelvin-programmer-pulsecommerce.hf.space](https://kelvin-programmer-pulsecommerce.hf.space)
 
-[![Live Demo](https://img.shields.io/badge/demo-live-success?logo=huggingface&logoColor=white)](https://kelvin-programmer-pulsecommerce.hf.space)
 [![CI](https://github.com/kelvinasiedu-programmer/pulsecommerce/actions/workflows/ci.yml/badge.svg)](https://github.com/kelvinasiedu-programmer/pulsecommerce/actions/workflows/ci.yml)
-[![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
-[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Docker](https://img.shields.io/badge/run-Docker-blue?logo=docker)](https://www.docker.com/)
 
----
+## What's in it
 
-## What this is
-
-PulseCommerce is a production-styled analytics platform for a fictional small-to-medium ecommerce brand. It takes a single source of truth (a thelook-style transactional dataset) and exposes five analytical capabilities that build on each other:
-
-| # | Layer | Question answered | Key techniques |
+| # | Page | Question | Approach |
 |---|---|---|---|
-| 1 | **Business Health** | Is the business healthy? | SQL KPI design, period-over-period, rolling windows |
-| 2 | **Funnel Drop-off** | Where do we lose customers? | 5-stage event funnel, segment conversion, lost-revenue quantification |
-| 3 | **Demand Forecast** | What's coming next? | Seasonal-naive vs Holt-Winters vs XGBoost, walk-forward backtest, MAPE selection |
-| 4 | **Churn Risk** | Who's about to leave? | RFM features, logistic + XGBoost, ROC-AUC, cohort retention |
-| 5 | **Experiment Readout** | Did the intervention work? | Simulated A/B, Welch t-test, guardrail metrics, ship/iterate/reject |
+| 1 | Business Health | Is the business healthy? | SQL KPIs, period-over-period, rolling windows |
+| 2 | Funnel | Where do we lose customers? | 5-stage event funnel, segment conversion, lost-revenue estimate |
+| 3 | Forecast | What's coming next? | Seasonal-naive vs Holt-Winters vs XGBoost, walk-forward MAPE |
+| 4 | Churn | Who's about to leave? | RFM features, logistic + XGBoost, ROC-AUC, cohort retention |
+| 5 | Experiment | Did the intervention work? | Simulated A/B, Welch t-test, guardrail metrics |
 
-Each layer is built on the same DuckDB warehouse and joins back to a single KPI dictionary, so "revenue" means the same number in the churn page as it does on the home dashboard.
+Every page reads from the same DuckDB warehouse and the same KPI dictionary,
+so "revenue" means the same thing on the churn page as it does on the home
+page.
 
----
+## Run it
 
-## 🚀 Quick start
-
-### Option A — local Python
 ```bash
-git clone https://github.com/kelvinasiedu/pulsecommerce.git
+git clone https://github.com/kelvinasiedu-programmer/pulsecommerce.git
 cd pulsecommerce
 
-python -m venv .venv && source .venv/bin/activate   # or .venv\Scripts\activate on Windows
+python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -r requirements-dev.txt
 pip install -e .
 
-# one command: generate data + build warehouse + run all 5 layers
+# generate data + build warehouse + run all 5 layers
 python -m pulsecommerce.cli all
 
 # launch the dashboard
 streamlit run dashboard/Home.py
 ```
 
-Open `http://localhost:8501`.
+Open `http://localhost:8501`. `docker compose up --build` works too.
 
-### Option B — Docker
-```bash
-docker compose up --build
-# open http://localhost:8501
-```
+For a smaller CI-sized dataset, `python -m pulsecommerce.cli generate --small`
+gives you ~2.5k users instead of the default ~25k.
 
-### Option C — Makefile
-```bash
-make install-dev
-make generate warehouse pipeline
-make app
-```
-
----
-
-## 🏗️ Architecture
+## How the data flows
 
 ```mermaid
 flowchart LR
-    A[Synthetic Data Generator<br/>Faker + seeded RNG] --> B[(Raw Parquet<br/>users / orders / items / events / products)]
-    B --> C{{DuckDB Warehouse}}
-    C --> D[Staging<br/>stg_*]
-    D --> E[Marts<br/>fct_orders, fct_sessions,<br/>dim_customers, dim_products]
-    E --> F[Metrics<br/>daily_kpis, weekly_category,<br/>funnel_segmented, customer_rfm]
-    F --> G1[Layer 1<br/>Health KPIs]
-    F --> G2[Layer 2<br/>Funnel]
-    F --> G3[Layer 3<br/>Forecast]
-    F --> G4[Layer 4<br/>Churn]
-    G4 --> G5[Layer 5<br/>Experiment]
-    G1 & G2 & G3 & G4 & G5 --> H[(Processed Parquet + JSON)]
-    H --> I[Streamlit Multi-Page App]
+    A[Synthetic generator] --> B[(Raw Parquet)]
+    B --> C{{DuckDB warehouse}}
+    C --> D[staging]
+    D --> E[marts]
+    E --> F[metrics]
+    F --> G[Layers 1-5]
+    G --> H[(Processed Parquet + JSON)]
+    H --> I[Streamlit multi-page app]
 ```
 
-### Repo layout
+SQL is split into `staging → marts → metrics`, which is the layout I'd use
+with dbt in a real setup.
+
+## Dataset
+
+The public `thelook_ecommerce` table on BigQuery needs GCP auth, so I wrote a
+deterministic generator that matches its schema:
+
+- ~25k users, 800 products, 95k orders, ~450k clickstream events
+- Weekly and annual seasonality (sine waves plus a Q4 holiday boost)
+- Segment-dependent funnel friction (device × channel conversion asymmetry)
+- Zipf-sampled repeat-buyer skew
+- Cohort retention decay so the churn model has something to learn
+- Reproducible via `--seed`
+
+## Repo layout
 
 ```
 pulsecommerce/
-├── src/pulsecommerce/          # Python package
-│   ├── config.py               # paths, dataset params, model settings
+├── src/pulsecommerce/
 │   ├── warehouse.py            # DuckDB adapter
-│   ├── pipeline.py             # orchestrates all 5 layers
-│   ├── cli.py                  # `pulsecommerce generate|warehouse|pipeline|all`
-│   ├── data/generator.py       # synthetic dataset with seasonality + funnel + cohorts
+│   ├── pipeline.py             # orchestrates the 5 layers
+│   ├── cli.py                  # pulsecommerce generate|warehouse|pipeline|all
+│   ├── data/generator.py       # synthetic dataset
 │   └── analytics/
-│       ├── health.py           # Layer 1
-│       ├── funnel.py           # Layer 2
-│       ├── forecast.py         # Layer 3 (Seasonal-naive, Holt-Winters, XGBoost)
-│       ├── churn.py            # Layer 4 (Logistic + XGBoost, RFM features)
-│       └── experiment.py       # Layer 5 (Welch t-test + guardrails)
-├── sql/
-│   ├── staging/                # stg_users, stg_orders, stg_order_items, stg_events, stg_products
-│   ├── marts/                  # fct_orders, fct_sessions, dim_customers, dim_products
-│   └── metrics/                # daily_kpis, weekly_category, funnel_segmented, customer_rfm
+│       ├── health.py
+│       ├── funnel.py
+│       ├── forecast.py         # Seasonal-naive, Holt-Winters, XGBoost
+│       ├── churn.py            # Logistic + XGBoost, RFM features
+│       └── experiment.py       # Welch t-test + guardrails
+├── sql/                        # staging / marts / metrics
 ├── dashboard/                  # Streamlit multi-page app
-│   ├── Home.py
-│   └── pages/
-├── tests/                      # pytest suite (data, warehouse, analytics, CLI)
+├── tests/
 ├── docs/
-│   ├── kpi_dictionary.md
-│   ├── methodology.md
-│   └── executive_memo.md
-├── .github/workflows/ci.yml    # lint + types + tests on 3 Python versions
-├── Dockerfile / docker-compose.yml
-├── Makefile
-├── pyproject.toml / requirements*.txt
-└── README.md
+└── .github/workflows/ci.yml
 ```
 
----
+## Stack
 
-## 🧪 Dataset
+DuckDB for the warehouse (zero-config, SQL-native, bundles into the wheel),
+layered SQL transformations, scikit-learn + XGBoost + statsmodels for
+modelling, Streamlit + Plotly for the dashboard, pytest / ruff / mypy, and
+GitHub Actions for CI across Python 3.10–3.12. Docker for reproducible
+deploy.
 
-Production-grade analytics needs production-grade data. Because BigQuery's `thelook_ecommerce` requires GCP auth, PulseCommerce ships a **deterministic synthetic generator** that matches its schema and behaviour:
-
-- **~25k users · 800 products · 95k orders · ~450k clickstream events** (default config)
-- **Weekly + annual seasonality** (sine waves + Q4 holiday boost)
-- **Segment-dependent funnel friction** (device × channel conversion asymmetry)
-- **Repeat-buyer skew** via Zipf sampling
-- **Cohort retention decay** so Layer 4's model actually has signal
-- Fully reproducible via `--seed`
-
-Run `python -m pulsecommerce.cli generate --small` for a CI-sized dataset (~2.5k users).
-
----
-
-## 📊 KPI framework
-
-See [`docs/kpi_dictionary.md`](docs/kpi_dictionary.md) for the full catalogue of metrics, owners, and SQL sources. Every chart in the dashboard ultimately joins back to this dictionary — so there is one definition of "revenue" across all five layers.
-
----
-
-## 🧰 Stack
-
-| Layer | Tool | Why |
-|---|---|---|
-| Warehouse | **DuckDB** | Zero-config, SQL-native, ships in the wheel — perfect for portfolio + Streamlit Cloud |
-| Transformations | **SQL (layered: staging → marts → metrics)** | Industry-standard dbt-style structure, but no external service |
-| Modeling | **scikit-learn, XGBoost, statsmodels** | Gradient boosting + interpretable baselines + classical time series |
-| Dashboard | **Streamlit + Plotly** | Multi-page app, deployable for free to Streamlit Cloud |
-| Quality | **pytest, ruff, mypy, pre-commit** | Professional Python engineering signal |
-| CI/CD | **GitHub Actions** | Matrix build on Python 3.10/3.11/3.12 |
-| Runtime | **Docker + docker-compose** | Reproducible deploy |
-
----
-
-## ✅ Testing & quality
+## Tests
 
 ```bash
 make ci           # ruff + mypy + pytest with coverage
 make test         # pytest only
-make lint         # ruff
-make typecheck    # mypy
 ```
 
-The test suite builds a *tiny* warehouse in-memory and exercises every analytical layer end-to-end — catching SQL bugs, feature-engineering regressions, and CLI drift in one pass.
+The suite builds a tiny warehouse in-memory and exercises every page
+end-to-end, which is the only way to catch SQL drift and CLI regressions in
+one pass.
 
----
+## Docs
 
-## ☁️ Deploy to Streamlit Cloud
+- [`docs/kpi_dictionary.md`](docs/kpi_dictionary.md) — metric definitions
+- [`docs/methodology.md`](docs/methodology.md) — modelling choices, backtest protocol, guardrail philosophy
+- [`docs/executive_memo.md`](docs/executive_memo.md) — one-page stakeholder readout
+- [`docs/DEPLOY.md`](docs/DEPLOY.md) — deployment notes
 
-1. Push this repo to GitHub
-2. Go to [share.streamlit.io](https://share.streamlit.io) → **New app**
-3. Point it at `dashboard/Home.py`, Python 3.12
-4. Streamlit Cloud will `pip install -r requirements.txt`. On first boot, call the CLI to bootstrap data:
+## Limitations
 
-   Either add an `app.py` wrapper that runs `pulsecommerce all` on cold start, or pre-commit the built `data/warehouse/pulse.duckdb` to the repo (gitignored by default — override if you want a zero-boot app).
+- The dataset is synthetic, so the findings are illustrative — the point is
+  the plumbing, not the numbers.
+- The forecast uses a heuristic prediction interval; conformal methods would
+  be the next step before anyone bet stock levels on it.
+- The "experiment" is simulated on historical windows; a real rollout would
+  need a live assignment mechanism.
 
-A ready-to-use deployment workflow is documented in [`docs/DEPLOY.md`](docs/DEPLOY.md).
-
----
-
-## 📄 Documentation
-
-- [`docs/kpi_dictionary.md`](docs/kpi_dictionary.md) — metric definitions and owners
-- [`docs/methodology.md`](docs/methodology.md) — modeling choices, backtest protocol, guardrail philosophy
-- [`docs/executive_memo.md`](docs/executive_memo.md) — 1-page stakeholder readout
-- [`docs/DEPLOY.md`](docs/DEPLOY.md) — deployment runbook
-
----
-
-## 📜 License
+## License
 
 MIT © Kelvin Asiedu
