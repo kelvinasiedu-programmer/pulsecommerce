@@ -6,7 +6,7 @@ colorTo: purple
 sdk: docker
 app_port: 7860
 pinned: false
-short_description: Ecommerce analytics — forecasting, churn, A/B testing
+short_description: Ecommerce analytics - forecasting, churn, A/B testing
 ---
 
 # PulseCommerce
@@ -112,7 +112,7 @@ pulsecommerce/
 DuckDB for the warehouse (zero-config, SQL-native, bundles into the wheel),
 layered SQL transformations, scikit-learn + XGBoost + statsmodels for
 modelling, Streamlit + Plotly for the dashboard, pytest / ruff / mypy, and
-GitHub Actions for CI across Python 3.10–3.12. Docker for reproducible
+GitHub Actions for CI across Python 3.10-3.12. Docker for reproducible
 deploy.
 
 ## Tests
@@ -128,14 +128,14 @@ one pass.
 
 ## Docs
 
-- [`docs/kpi_dictionary.md`](docs/kpi_dictionary.md) — metric definitions
-- [`docs/methodology.md`](docs/methodology.md) — modelling choices, backtest protocol, guardrail philosophy
-- [`docs/executive_memo.md`](docs/executive_memo.md) — one-page stakeholder readout
-- [`docs/DEPLOY.md`](docs/DEPLOY.md) — deployment notes
+- [`docs/kpi_dictionary.md`](docs/kpi_dictionary.md) - metric definitions
+- [`docs/methodology.md`](docs/methodology.md) - modelling choices, backtest protocol, guardrail philosophy
+- [`docs/executive_memo.md`](docs/executive_memo.md) - one-page stakeholder readout
+- [`docs/DEPLOY.md`](docs/DEPLOY.md) - deployment notes
 
 ## Limitations
 
-- The dataset is synthetic, so the findings are illustrative — the point is
+- The dataset is synthetic, so the findings are illustrative - the point is
   the plumbing, not the numbers.
 - The forecast uses a heuristic prediction interval; conformal methods would
   be the next step before anyone bet stock levels on it.

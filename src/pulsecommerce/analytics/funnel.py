@@ -1,4 +1,4 @@
-"""Layer 2 — Funnel drop-off & sales efficiency analysis."""
+"""Layer 2 - Funnel drop-off & sales efficiency analysis."""
 
 from __future__ import annotations
 

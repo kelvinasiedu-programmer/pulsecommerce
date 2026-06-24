@@ -1,4 +1,4 @@
-"""Shared pytest fixtures — build a tiny warehouse once per session."""
+"""Shared pytest fixtures - build a tiny warehouse once per session."""
 
 from __future__ import annotations
 

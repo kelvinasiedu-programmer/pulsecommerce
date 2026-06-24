@@ -1,7 +1,7 @@
-"""Layer 3 — Demand forecasting with seasonal + ML models.
+"""Layer 3 - Demand forecasting with seasonal + ML models.
 
 Three forecasters compete on the same weekly category-level data:
-  * Seasonal naive  (baseline — last-year-same-week)
+  * Seasonal naive  (baseline - last-year-same-week)
   * Holt-Winters exponential smoothing (statsmodels)
   * Gradient boosted trees on lag + calendar features (XGBoost)
 

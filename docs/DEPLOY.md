@@ -24,7 +24,7 @@ Three supported targets. Pick the one that matches the audience.
 >   from pulsecommerce.config import WAREHOUSE_PATH
 >   if not WAREHOUSE_PATH.exists():
 >       import streamlit as st
->       with st.spinner("First boot — building warehouse (~60 s)…"):
+>       with st.spinner("First boot - building warehouse (~60 s)…"):
 >           from pulsecommerce.cli import main
 >           main(["all", "--small"])
 >   ```

@@ -4,7 +4,7 @@
 
 - **Source**: synthetic thelook-style dataset (`pulsecommerce.data.generator`)
 - **Size (default)**: 25k users, 800 products, 95k orders, ~450k events over ~27 months
-- **Seed**: `42` — the entire pipeline is deterministic
+- **Seed**: `42` - the entire pipeline is deterministic
 
 The generator encodes several business phenomena on purpose so every downstream layer has something to find:
 
@@ -18,11 +18,11 @@ The generator encodes several business phenomena on purpose so every downstream 
 
 Three-tier SQL discipline, dbt-style but without the service dependency:
 
-- `staging/` — type casting and renaming only; one view per source table
-- `marts/` — business entities with pre-joined context (`fct_orders`, `dim_customers`, `fct_sessions`, `dim_products`)
-- `metrics/` — final KPI views consumed by Python layers (`daily_kpis`, `funnel_segmented`, `weekly_category`, `customer_rfm`)
+- `staging/` - type casting and renaming only; one view per source table
+- `marts/` - business entities with pre-joined context (`fct_orders`, `dim_customers`, `fct_sessions`, `dim_products`)
+- `metrics/` - final KPI views consumed by Python layers (`daily_kpis`, `funnel_segmented`, `weekly_category`, `customer_rfm`)
 
-Every Python layer reads from `metrics/` or `marts/` only — never from raw tables directly.
+Every Python layer reads from `metrics/` or `marts/` only - never from raw tables directly.
 
 ## Forecasting (Layer 3)
 
@@ -52,7 +52,7 @@ Every Python layer reads from `metrics/` or `marts/` only — never from raw tab
 
 - **Audience**: top-30% risk deciles from Layer 4 (minimum 500 users)
 - **Assignment**: 50/50 random with a seed
-- **Effect simulation**: treatment receives +8 pp absolute conversion boost and a small negative drift on guardrails — so the readout is realistic, not trivial
+- **Effect simulation**: treatment receives +8 pp absolute conversion boost and a small negative drift on guardrails - so the readout is realistic, not trivial
 - **Tests**: Welch's two-sample t-test for every metric at α = 0.05
 - **Decision rules** (see `kpi_dictionary.md`):
   - `ship` requires significant positive lift **and** no significant guardrail regression
@@ -61,7 +61,7 @@ Every Python layer reads from `metrics/` or `marts/` only — never from raw tab
 
 ## Limitations
 
-- Synthetic data — the absolute numbers are illustrative; the *method* is what's real
+- Synthetic data - the absolute numbers are illustrative; the *method* is what's real
 - Forecast intervals use a simple residual-std heuristic (replace with conformal prediction for production)
 - Churn label definition is single-threshold; a multi-window or survival model would be stronger in production
-- Experiment uses observational proxies (last 60 days) rather than a true concurrent randomisation — real Ship/No-Ship decisions require live randomised exposure
+- Experiment uses observational proxies (last 60 days) rather than a true concurrent randomisation - real Ship/No-Ship decisions require live randomised exposure

@@ -1,4 +1,4 @@
-"""Layer 1 — Business Health KPIs.
+"""Layer 1 - Business Health KPIs.
 
 Produces the executive-facing KPI bundle used on the landing page:
   * revenue, orders, AOV, conversion rate

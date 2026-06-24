@@ -41,7 +41,7 @@ Every chart in PulseCommerce traces back to a metric defined here. When two laye
 | **Monetary** | Lifetime non-cancelled revenue |
 | **Feature cutoff** | `snapshot − 90 days`: features are computed on data *before* the churn window to prevent leakage |
 | **ROC-AUC** | Area under the receiver operating characteristic curve on a 25% stratified holdout |
-| **Risk decile** | `qcut(churn_risk, q=10)` — decile 10 = top 10% highest risk |
+| **Risk decile** | `qcut(churn_risk, q=10)` - decile 10 = top 10% highest risk |
 
 ## Experiment (Layer 5)
 

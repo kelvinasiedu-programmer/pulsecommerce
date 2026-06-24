@@ -1,4 +1,4 @@
-"""PulseCommerce — overview dashboard.
+"""PulseCommerce - overview dashboard.
 
 Summarizes the trailing-28-day state of the synthetic store across the five
 analytical layers, with drill-through links into each page.
@@ -30,7 +30,7 @@ sidebar_brand()
 def _ensure_bootstrapped() -> None:
     if (PROCESSED_DIR / "kpi_cards.parquet").exists():
         return
-    with st.spinner("First-time setup — generating data and running the full 5-layer pipeline…"):
+    with st.spinner("First-time setup - generating data and running the full 5-layer pipeline…"):
         from pulsecommerce.cli import main
 
         main(["all", "--small"])
@@ -118,7 +118,7 @@ st.markdown(
         flex-shrink: 0;
       }}
       .hp-kpi .ic svg {{ width: 22px; height: 22px; }}
-      /* Icon tones — derived palette; kept as a documented secondary scale */
+      /* Icon tones - derived palette; kept as a documented secondary scale */
       .hp-kpi .ic.indigo  {{ background: {COLORS['primary_light']}; color: {COLORS['primary_dark']}; }}
       .hp-kpi .ic.emerald {{ background: {COLORS['success_bg']}; color: #047857; }}
       .hp-kpi .ic.amber   {{ background: {COLORS['warning_bg']}; color: #B45309; }}
@@ -134,8 +134,8 @@ st.markdown(
         font-size: 1.5rem; font-weight: 700; color: {COLORS['text']};
         letter-spacing: -0.02em; margin: 2px 0 6px 0; line-height: 1.1;
       }}
-      /* Delta chip: direction communicated via three redundant channels — color,
-         arrow glyph, and the word "up"/"down" — so color-blind users and
+      /* Delta chip: direction communicated via three redundant channels - color,
+         arrow glyph, and the word "up"/"down" - so color-blind users and
          screen-reader users get the same information. */
       .hp-kpi .chip {{
         display: inline-flex; align-items: center; gap: 4px;
@@ -409,9 +409,9 @@ with right:
     orders_row = cards_by_key.get("orders") if id_col else None
     sessions_row = cards_by_key.get("sessions") if id_col else None
     aov_row = cards_by_key.get("aov") if id_col else None
-    orders_v = _fmt(orders_row["value"], orders_row["format"]) if orders_row is not None else "—"
-    sessions_v = _fmt(sessions_row["value"], sessions_row["format"]) if sessions_row is not None else "—"
-    aov_v = _fmt(aov_row["value"], aov_row["format"]) if aov_row is not None else "—"
+    orders_v = _fmt(orders_row["value"], orders_row["format"]) if orders_row is not None else "-"
+    sessions_v = _fmt(sessions_row["value"], sessions_row["format"]) if sessions_row is not None else "-"
+    aov_v = _fmt(aov_row["value"], aov_row["format"]) if aov_row is not None else "-"
     st.markdown(
         f"""
         <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:10px; margin-top:-10px;">
@@ -569,9 +569,9 @@ with bottom_right:
     # Experiment verdict card
     rec = (experiment.get("recommendation") or "").lower()
     rec_cls = {"ship": "ship", "iterate": "iterate", "reject": "reject"}.get(rec, "iterate")
-    rec_label = {"ship": "✓ SHIP", "iterate": "◐ ITERATE", "reject": "✕ REJECT"}.get(rec, "—")
+    rec_label = {"ship": "✓ SHIP", "iterate": "◐ ITERATE", "reject": "✕ REJECT"}.get(rec, "-")
     auc = churn_metrics.get("roc_auc_xgb", 0)
-    biggest = funnel_insights.get("biggest_drop_stage", "—").replace("_", " ").title()
+    biggest = funnel_insights.get("biggest_drop_stage", "-").replace("_", " ").title()
     lost = funnel_insights.get("estimated_lost_revenue", 0)
 
     st.markdown(
@@ -616,7 +616,7 @@ st.markdown(
     unsafe_allow_html=True,
 )
 nav_items = [
-    ("01", "📊", "Business Health", "Revenue, AOV, conversion — period vs. period with channel/category mix."),
+    ("01", "📊", "Business Health", "Revenue, AOV, conversion - period vs. period with channel/category mix."),
     ("02", "🔻", "Funnel Drop-off", "Five-stage event funnel with segmented device × channel heatmap."),
     ("03", "📈", "Demand Forecast", "Seasonal-naive vs Holt-Winters vs XGBoost, selected by backtest MAPE."),
     ("04", "⚠️", "Churn Risk", "RFM + behavioral features, ROC-AUC leaderboard, top at-risk list."),

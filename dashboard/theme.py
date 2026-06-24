@@ -1,4 +1,4 @@
-"""Shared design system for PulseCommerce — a professional BI platform.
+"""Shared design system for PulseCommerce - a professional BI platform.
 
 Light, card-based UI inspired by Stripe / Shopify analytics. Every page imports
 `apply_theme()` at the top and uses the helpers below for consistent visuals.
@@ -67,7 +67,7 @@ _GLOBAL_CSS = f"""
     background: {COLORS['bg']};
   }}
 
-  /* Main block — fluid width so content expands when the sidebar is collapsed */
+  /* Main block - fluid width so content expands when the sidebar is collapsed */
   .main .block-container {{
     padding-top: 1.5rem;
     padding-bottom: 4rem;
@@ -115,7 +115,7 @@ _GLOBAL_CSS = f"""
     color: white !important;
     fill: white !important;
   }}
-  /* Sidebar's own collapse chevron — keep obvious */
+  /* Sidebar's own collapse chevron - keep obvious */
   [data-testid="stSidebarCollapseButton"] {{
     visibility: visible !important;
     display: flex !important;
@@ -509,7 +509,7 @@ def verdict_banner(recommendation: str, rationale: str) -> None:
         "iterate": ("iterate", "◐ ITERATE", "Directional but not conclusive. Needs more data or refinement."),
         "reject": ("reject", "✕ REJECT", "Primary metric did not move, or a guardrail was breached."),
     }
-    tone, title, default_sub = mapping.get(rec, ("iterate", rec.upper() or "—", ""))
+    tone, title, default_sub = mapping.get(rec, ("iterate", rec.upper() or "-", ""))
     st.markdown(
         f"""
         <div class="pc-verdict {tone}">

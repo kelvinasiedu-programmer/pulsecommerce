@@ -1,4 +1,4 @@
-"""Layer 4 — Churn early-warning system.
+"""Layer 4 - Churn early-warning system.
 
 Builds a customer feature table (RFM + behavioral + cohort) and trains
 a logistic + gradient-boosted classifier to predict churn, defined as
@@ -277,7 +277,7 @@ class ChurnModel:
             "snapshot": snapshot.isoformat(),
         }
         logger.info(
-            "churn model trained — AUC=%.3f (xgb) / %.3f (logreg), AP=%.3f",
+            "churn model trained - AUC=%.3f (xgb) / %.3f (logreg), AP=%.3f",
             auc,
             lr_auc,
             ap,

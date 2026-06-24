@@ -39,7 +39,7 @@ def run_pipeline(out_dir: Path = PROCESSED_DIR) -> dict[str, Path]:
 
     with Warehouse() as wh:
         # 1. Health
-        logger.info("layer 1 — computing health KPIs")
+        logger.info("layer 1 - computing health KPIs")
         report = HealthAnalyst(wh).report(window_days=28)
         cards_df = pd.DataFrame([c.to_dict() for c in report.cards])
         paths["kpi_cards"] = _write(cards_df, out_dir / "kpi_cards.parquet")
@@ -48,7 +48,7 @@ def run_pipeline(out_dir: Path = PROCESSED_DIR) -> dict[str, Path]:
         paths["kpi_category"] = _write(report.by_category, out_dir / "kpi_category.parquet")
 
         # 2. Funnel
-        logger.info("layer 2 — computing funnel")
+        logger.info("layer 2 - computing funnel")
         funnel = FunnelAnalyst(wh)
         paths["funnel_overall"] = _write(funnel.overall(), out_dir / "funnel_overall.parquet")
         paths["funnel_segmented"] = _write(
@@ -59,7 +59,7 @@ def run_pipeline(out_dir: Path = PROCESSED_DIR) -> dict[str, Path]:
         paths["funnel_insights"] = out_dir / "funnel_insights.json"
 
         # 3. Forecast
-        logger.info("layer 3 — running forecasts")
+        logger.info("layer 3 - running forecasts")
         forecaster = DemandForecaster(wh)
         forecast_rows = []
         mape_rows = []
@@ -82,7 +82,7 @@ def run_pipeline(out_dir: Path = PROCESSED_DIR) -> dict[str, Path]:
         paths["forecast_mape"] = _write(pd.DataFrame(mape_rows), out_dir / "forecast_mape.parquet")
 
         # 4. Churn
-        logger.info("layer 4 — training churn model")
+        logger.info("layer 4 - training churn model")
         churn = None
         try:
             churn = ChurnModel(wh).fit_and_score()
@@ -96,12 +96,12 @@ def run_pipeline(out_dir: Path = PROCESSED_DIR) -> dict[str, Path]:
             _write_json(churn.metrics, out_dir / "churn_metrics.json")
             paths["churn_metrics"] = out_dir / "churn_metrics.json"
         except (ValueError, RuntimeError) as exc:
-            logger.warning("skipping churn layer — insufficient signal: %s", exc)
+            logger.warning("skipping churn layer - insufficient signal: %s", exc)
             _write_json({"skipped": True, "reason": str(exc)}, out_dir / "churn_metrics.json")
             paths["churn_metrics"] = out_dir / "churn_metrics.json"
 
         # 5. Experiment on top-risk customers (or untargeted if churn skipped)
-        logger.info("layer 5 — running simulated experiment readout")
+        logger.info("layer 5 - running simulated experiment readout")
         if churn is not None:
             audience = churn.scores.nlargest(max(int(len(churn.scores) * 0.3), 500), "churn_risk")[
                 ["user_id"]
@@ -125,7 +125,7 @@ def run_pipeline(out_dir: Path = PROCESSED_DIR) -> dict[str, Path]:
         )
         paths["experiment"] = out_dir / "experiment.json"
 
-    logger.info("pipeline complete — %d artifacts written", len(paths))
+    logger.info("pipeline complete - %d artifacts written", len(paths))
     return paths
 
 

@@ -4,7 +4,7 @@ PYTHON := python
 PIP := $(PYTHON) -m pip
 
 help:
-	@echo "PulseCommerce — available targets:"
+	@echo "PulseCommerce - available targets:"
 	@echo "  install       Install runtime dependencies"
 	@echo "  install-dev   Install dev dependencies + package in editable mode"
 	@echo "  generate      Generate synthetic ecommerce dataset"

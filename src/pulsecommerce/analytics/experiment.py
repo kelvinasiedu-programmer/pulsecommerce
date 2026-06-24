@@ -1,4 +1,4 @@
-"""Layer 5 — Experiment readout (promotion lift analyzer).
+"""Layer 5 - Experiment readout (promotion lift analyzer).
 
 Simulates an A/B test targeting a segment (by default: top-risk churn customers),
 computes a primary metric lift with a 2-sample test, checks guardrail metrics,
@@ -99,7 +99,7 @@ class PromotionExperiment:
         if audience is not None and not audience.empty:
             panel = panel.merge(audience[["user_id"]], on="user_id", how="inner")
         if len(panel) < 2 * EXPERIMENT.min_sample_size:
-            logger.warning("audience small (%s rows) — results may be unstable", len(panel))
+            logger.warning("audience small (%s rows) - results may be unstable", len(panel))
 
         rng = np.random.default_rng(self.assignment_seed)
         panel = panel.sample(frac=1.0, random_state=self.assignment_seed).reset_index(drop=True)
@@ -229,7 +229,7 @@ def _decide(primary: MetricResult, guardrails: list[MetricResult]) -> tuple[str,
         breaches = ", ".join(g.name for g in guardrail_breach)
         return (
             "reject",
-            f"Guardrail regression on {breaches} — do not ship despite primary lift.",
+            f"Guardrail regression on {breaches} - do not ship despite primary lift.",
         )
     if primary.rel_lift > 0 and not primary.is_significant:
         return (
