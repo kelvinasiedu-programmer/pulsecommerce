@@ -1,4 +1,4 @@
-"""Business Health — executive KPI deep dive with trend, channel, and category views."""
+"""Business Health - executive KPI deep dive with trend, channel, and category views."""
 
 from __future__ import annotations
 
@@ -49,7 +49,7 @@ hero(
     title="Is the business healthy?",
     subtitle=(
         "Trailing 28-day KPIs versus the prior equivalent window. Financials, traffic, "
-        "and efficiency — grouped for scannability."
+        "and efficiency - grouped for scannability."
     ),
 )
 
@@ -181,7 +181,7 @@ with tab_category:
 
 st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
 st.caption(
-    "Next — **Funnel Drop-off** localizes where conversion is leaking; "
+    "Next - **Funnel Drop-off** localizes where conversion is leaking; "
     "revenue-at-risk is quantified there. All figures sourced from the `daily_kpis` metric table."
 )
 _ = CATEGORICAL  # re-export for type-check stability

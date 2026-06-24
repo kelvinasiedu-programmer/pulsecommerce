@@ -1,4 +1,4 @@
-"""Demand Forecast — baseline vs ML, selected per category by walk-forward MAPE."""
+"""Demand Forecast - baseline vs ML, selected per category by walk-forward MAPE."""
 
 from __future__ import annotations
 
@@ -44,8 +44,8 @@ hero(
     eyebrow="Layer 03 · Demand Forecast",
     title="What's coming next?",
     subtitle=(
-        "Per-category 12-week revenue forecasts. Three models compete — Seasonal-Naive, "
-        "Holt-Winters, XGBoost — and the one with the lowest backtest MAPE wins."
+        "Per-category 12-week revenue forecasts. Three models compete - Seasonal-Naive, "
+        "Holt-Winters, XGBoost - and the one with the lowest backtest MAPE wins."
     ),
 )
 
@@ -79,7 +79,7 @@ col_sel, _ = st.columns([3, 7])
 with col_sel:
     category = st.selectbox("Category", categories, index=0, label_visibility="visible")
 
-section(f"{category} — revenue history and forecast", "Shaded band is the 95% prediction interval.")
+section(f"{category} - revenue history and forecast", "Shaded band is the 95% prediction interval.")
 
 cat_df = forecast[forecast["category"] == category].sort_values("week_start")
 hist = cat_df[cat_df["kind"] == "history"]
@@ -127,7 +127,7 @@ if not mape.empty:
     left, right = st.columns([6, 4])
 
     with left:
-        section("Model backtest — MAPE by category", "Lower is better. The lowest value per row is highlighted.")
+        section("Model backtest - MAPE by category", "Lower is better. The lowest value per row is highlighted.")
         mape_cols = [c for c in mape.columns if c not in ("category", "chosen_model")]
         display = mape.set_index("category")
         styled = display.style.format(
@@ -178,6 +178,6 @@ if not forecast_only.empty:
 
 
 st.caption(
-    "Next — **Churn Risk** identifies which customers are most likely to stop buying, so demand signal "
+    "Next - **Churn Risk** identifies which customers are most likely to stop buying, so demand signal "
     "can be converted into retention spend."
 )

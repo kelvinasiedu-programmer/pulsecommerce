@@ -1,4 +1,4 @@
-"""Churn Risk — the retention command center."""
+"""Churn Risk - the retention command center."""
 
 from __future__ import annotations
 
@@ -56,13 +56,13 @@ hero(
     title="Who's about to leave?",
     subtitle=(
         "XGBoost + Logistic baseline trained on RFM and behavioral features. Risk scores feed "
-        "directly into the Experiment page — the highest-risk customers are the retention test audience."
+        "directly into the Experiment page - the highest-risk customers are the retention test audience."
     ),
 )
 
 
 # --------------------------------------------------------------------------- #
-# KPI strip — Business Reality first, Model Health second
+# KPI strip - Business Reality first, Model Health second
 # --------------------------------------------------------------------------- #
 churn_rate = metrics.get("churn_rate", 0)
 auc_xgb = metrics.get("roc_auc_xgb", 0)
@@ -94,7 +94,7 @@ tab_dist, tab_cohort, tab_imp, tab_top = st.tabs([
 
 with tab_dist:
     section("Distribution of predicted churn risk",
-            "Zones: Safe (< 0.3) · Monitor (0.3–0.7) · High risk (≥ 0.7).")
+            "Zones: Safe (< 0.3) · Monitor (0.3-0.7) · High risk (≥ 0.7).")
 
     hist_data = scores["churn_risk"]
     bins = 40
@@ -225,6 +225,6 @@ with tab_top:
 
 st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
 st.caption(
-    "Next — **Experiment Readout** measures whether a retention promo targeted at these high-risk customers "
+    "Next - **Experiment Readout** measures whether a retention promo targeted at these high-risk customers "
     "moved the primary metric without breaking any guardrail."
 )

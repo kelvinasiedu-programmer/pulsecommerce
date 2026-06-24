@@ -1,4 +1,4 @@
-"""Experiment Readout — ship / iterate / reject verdict with guardrails."""
+"""Experiment Readout - ship / iterate / reject verdict with guardrails."""
 
 from __future__ import annotations
 
@@ -63,8 +63,8 @@ verdict_banner(exp.get("recommendation", ""), exp.get("rationale", ""))
 kpi_row([
     {"label": "Control sample", "value": f"{exp.get('n_control', 0):,}"},
     {"label": "Treatment sample", "value": f"{exp.get('n_treatment', 0):,}"},
-    {"label": "Start", "value": exp.get("start", "—")[:10]},
-    {"label": "End", "value": exp.get("end", "—")[:10]},
+    {"label": "Start", "value": exp.get("start", "-")[:10]},
+    {"label": "End", "value": exp.get("end", "-")[:10]},
 ])
 
 st.markdown("<div style='height: 18px;'></div>", unsafe_allow_html=True)
@@ -111,7 +111,7 @@ with left:
     )
 
 with right:
-    section("Relative lift — primary vs. guardrails", "Green = direction OK. Red = guardrail breach.")
+    section("Relative lift - primary vs. guardrails", "Green = direction OK. Red = guardrail breach.")
 
     labels = [primary.get("name", "primary").replace("_", " ").title()] + [
         g.get("name", "").replace("_", " ").title() for g in guardrails
@@ -188,7 +188,7 @@ st.markdown(
     f"""
     <div class="pc-card">
       <div style="font-size:0.9rem; color:{COLORS['text']}; line-height:1.6;">
-        {exp.get('hypothesis', '—')}
+        {exp.get('hypothesis', '-')}
       </div>
       <div style="font-size:0.8rem; color:{COLORS['text_muted']}; margin-top:12px;
                   padding-top:12px; border-top:1px solid {COLORS['border']};">

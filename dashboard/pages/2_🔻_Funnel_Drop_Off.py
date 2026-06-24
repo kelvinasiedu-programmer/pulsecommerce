@@ -1,4 +1,4 @@
-"""Funnel & Drop-off — session-to-purchase flow, segmented by device × channel."""
+"""Funnel & Drop-off - session-to-purchase flow, segmented by device × channel."""
 
 from __future__ import annotations
 
@@ -56,7 +56,7 @@ hero(
     title="Where are we losing customers?",
     subtitle=(
         "Five-stage event funnel with segmented conversion by device and channel. "
-        "Leakage is quantified in lost revenue — and tied to the highest-friction segment."
+        "Leakage is quantified in lost revenue - and tied to the highest-friction segment."
     ),
 )
 
@@ -64,7 +64,7 @@ hero(
 # --------------------------------------------------------------------------- #
 # KPI strip
 # --------------------------------------------------------------------------- #
-biggest_stage = insights.get("biggest_drop_stage", "—").replace("_", " ").title()
+biggest_stage = insights.get("biggest_drop_stage", "-").replace("_", " ").title()
 biggest_rate = insights.get("biggest_drop_rate", 0) * 100
 lost = insights.get("estimated_lost_revenue", 0)
 total_sessions = int(overall.iloc[0]["count"]) if not overall.empty else 0
@@ -83,7 +83,7 @@ st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
 # --------------------------------------------------------------------------- #
 # Horizontal step funnel
 # --------------------------------------------------------------------------- #
-section("Conversion flow", "Step funnel — stage volume and % of previous stage.")
+section("Conversion flow", "Step funnel - stage volume and % of previous stage.")
 
 stages = overall["stage"].str.replace("_", " ").str.title().tolist()
 counts = overall["count"].tolist()
@@ -123,7 +123,7 @@ view = seg[seg["sessions"] >= min_sessions].copy()
 left, right = st.columns([5, 5])
 
 with left:
-    st.markdown("**Segment table** — sortable, with progress bars")
+    st.markdown("**Segment table** - sortable, with progress bars")
     view["conversion"] = view["overall_conversion"]
     cols_to_show = ["device", "channel", "sessions", "overall_conversion"]
     opt_cols = [c for c in ("view_rate", "cart_rate", "purchase_rate") if c in view.columns]
@@ -142,7 +142,7 @@ with left:
     st.dataframe(styled, use_container_width=True, hide_index=True, height=420)
 
 with right:
-    st.markdown("**Device × channel heatmap** — single-hue indigo, darker = stronger conversion")
+    st.markdown("**Device × channel heatmap** - single-hue indigo, darker = stronger conversion")
     if not view.empty:
         heat = view.pivot_table(
             index="device", columns="channel", values="overall_conversion", aggfunc="mean"
@@ -173,36 +173,36 @@ section("Recommended actions", "Each card ties a diagnosis to an owner and a dol
 
 worst = insights.get("worst_segment", {})
 best = insights.get("best_segment", {})
-worst_dev = worst.get("device", "—")
-worst_ch = worst.get("channel", "—")
+worst_dev = worst.get("device", "-")
+worst_ch = worst.get("channel", "-")
 worst_conv = worst.get("overall_conversion", 0) * 100
-best_dev = best.get("device", "—")
-best_ch = best.get("channel", "—")
+best_dev = best.get("device", "-")
+best_ch = best.get("channel", "-")
 best_conv = best.get("overall_conversion", 0) * 100
 
 c1, c2 = st.columns(2)
 with c1:
     insight_card(
-        "🔍 Diagnose — worst-performing segment",
+        "🔍 Diagnose - worst-performing segment",
         f"<b>{worst_dev} / {worst_ch}</b> converts at <b>{worst_conv:.2f}%</b> "
         f"vs. <b>{best_conv:.2f}%</b> for <b>{best_dev} / {best_ch}</b>. "
         f"That's a <b>{(best_conv - worst_conv):.2f} pp</b> gap.",
         tone="warning",
     )
     insight_card(
-        "📍 Localize — stage-level friction",
+        "📍 Localize - stage-level friction",
         f"Biggest drop occurs at <b>{biggest_stage}</b> (-{biggest_rate:.1f}%). "
         f"Investigate UX there before optimizing earlier stages.",
     )
 with c2:
     insight_card(
-        "💰 Quantify — revenue opportunity",
+        "💰 Quantify - revenue opportunity",
         f"Closing half the gap on the worst segment recovers roughly "
         f"<b>${lost / 2:,.0f}</b> over the analysis window.",
         tone="success",
     )
     insight_card(
-        "🎯 Act — targeted experiment",
+        "🎯 Act - targeted experiment",
         f"Route <b>{worst_dev} / {worst_ch}</b> into a retention-focused A/B test. "
         f"See the <b>Experiment Readout</b> page for the live result.",
         tone="success",
@@ -211,5 +211,5 @@ with c2:
 
 st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
 st.caption(
-    "Next — **Demand Forecast** answers *what's coming*, converting funnel signal into forward revenue."
+    "Next - **Demand Forecast** answers *what's coming*, converting funnel signal into forward revenue."
 )
