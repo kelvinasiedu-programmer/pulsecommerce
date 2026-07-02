@@ -11,6 +11,7 @@ Usage:
 
 from __future__ import annotations
 
+import re
 from collections.abc import Iterable, Sequence
 from pathlib import Path
 from typing import Any
@@ -22,6 +23,10 @@ from pulsecommerce.config import RAW_DIR, SQL_DIR, WAREHOUSE_PATH, ensure_dirs
 from pulsecommerce.logging_utils import get_logger
 
 logger = get_logger(__name__)
+
+# A relation name cannot be passed as a bound parameter, so it is interpolated
+# into the query text. Restrict it to a bare SQL identifier to keep that safe.
+_IDENTIFIER_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
 
 
 RAW_TABLES: tuple[str, ...] = ("users", "products", "orders", "order_items", "events")
@@ -125,6 +130,8 @@ class Warehouse:
         return conn.execute(sql, list(params)).fetchdf()
 
     def table(self, name: str) -> pd.DataFrame:
+        if not _IDENTIFIER_RE.match(name):
+            raise ValueError(f"Invalid table name: {name!r}")
         return self.query(f"SELECT * FROM {name}")
 
     def exists(self, name: str) -> bool:
