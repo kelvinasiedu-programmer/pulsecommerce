@@ -48,9 +48,52 @@ def apply_theme(page_title: str, page_icon: str) -> None:
         page_title=f"{page_title} · PulseCommerce",
         page_icon=page_icon,
         layout="wide",
-        initial_sidebar_state="expanded",
+        initial_sidebar_state="auto",
     )
     st.markdown(_GLOBAL_CSS, unsafe_allow_html=True)
+    _sync_sidebar_for_viewport()
+
+
+def _sync_sidebar_for_viewport() -> None:
+    """Keep desktop navigation discoverable without covering mobile content."""
+    from streamlit.components.v1 import html as components_html
+
+    components_html(
+        """
+        <script>
+          (function() {
+            const parentWin = window.parent;
+            const parentDoc = parentWin.document;
+
+            const isMobile = () => parentWin.innerWidth <= 900;
+            const isExpanded = () => {
+              const sb = parentDoc.querySelector('section[data-testid="stSidebar"]');
+              return sb && sb.getAttribute('aria-expanded') === 'true';
+            };
+            const collapseSidebar = () => {
+              if (!isMobile() || !isExpanded()) return true;
+              const btn = parentDoc.querySelector(
+                '[data-testid="stSidebarCollapseButton"] button, '
+                + '[data-testid="stSidebarCollapseButton"], '
+                + 'button[aria-label="Close sidebar"]'
+              );
+              if (btn) { btn.click(); return true; }
+              return false;
+            };
+
+            let tries = 0;
+            const attempt = () => {
+              if (collapseSidebar()) return;
+              if (++tries < 40) requestAnimationFrame(attempt);
+            };
+            attempt();
+            parentWin.addEventListener('resize', attempt);
+            parentWin.addEventListener('load', attempt);
+          })();
+        </script>
+        """,
+        height=0,
+    )
 
 
 _GLOBAL_CSS = f"""
@@ -129,7 +172,8 @@ _GLOBAL_CSS = f"""
   /* Only pin width when the sidebar is actually expanded, so it can
      collapse to 0 and let main content flush left. */
   section[data-testid="stSidebar"][aria-expanded="true"] {{
-    min-width: 260px !important;
+    min-width: 280px !important;
+    width: 280px !important;
   }}
   /* Ensure the collapsed sidebar has no visible footprint */
   section[data-testid="stSidebar"][aria-expanded="false"] {{
@@ -190,15 +234,19 @@ _GLOBAL_CSS = f"""
     font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 0.04em;
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
   }}
   [data-testid="stMetricValue"] {{
     font-size: 1.5rem !important;
     font-weight: 700 !important;
     color: {COLORS['text']} !important;
     line-height: 1.1;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    overflow-wrap: anywhere;
   }}
   [data-testid="stMetricDelta"] {{
     font-size: 0.8rem !important;
@@ -230,6 +278,7 @@ _GLOBAL_CSS = f"""
     border: 1px solid {COLORS['border']};
     border-radius: 10px;
     overflow: hidden;
+    background: {COLORS['surface']} !important;
   }}
 
   /* Plotly chart containers */
@@ -309,6 +358,64 @@ _GLOBAL_CSS = f"""
     font-size: 0.95rem;
     color: {COLORS['text_muted']};
     max-width: 780px;
+  }}
+
+  @media (max-width: 900px) {{
+    .main .block-container {{
+      padding-top: 1.1rem !important;
+      padding-left: 1rem !important;
+      padding-right: 1rem !important;
+      padding-bottom: 2.5rem !important;
+    }}
+    section[data-testid="stSidebar"][aria-expanded="true"] {{
+      max-width: min(82vw, 300px) !important;
+      min-width: min(82vw, 300px) !important;
+      width: min(82vw, 300px) !important;
+    }}
+    .pc-hero {{
+      padding: 18px 20px;
+      margin-bottom: 18px;
+    }}
+    .pc-hero-title {{
+      font-size: 1.45rem;
+      line-height: 1.18;
+    }}
+    .pc-hero-sub {{
+      font-size: 0.9rem;
+      line-height: 1.55;
+    }}
+    [data-testid="stMetric"] {{
+      padding: 14px 16px;
+      min-height: 112px;
+    }}
+    [data-testid="stMetricLabel"] {{
+      font-size: 0.74rem !important;
+      line-height: 1.25 !important;
+    }}
+    [data-testid="stMetricValue"] {{
+      font-size: 1.35rem !important;
+      line-height: 1.12 !important;
+    }}
+    .stTabs [data-baseweb="tab-list"] {{
+      overflow-x: auto;
+      flex-wrap: nowrap;
+    }}
+    .stTabs [data-baseweb="tab"] {{
+      white-space: nowrap;
+      padding: 9px 12px;
+    }}
+  }}
+
+  @media (max-width: 520px) {{
+    .main .block-container {{
+      padding-left: 0.85rem !important;
+      padding-right: 0.85rem !important;
+    }}
+    .pc-card,
+    .pc-hero,
+    .pc-insight {{
+      border-radius: 10px;
+    }}
   }}
 
   /* Insight card */
