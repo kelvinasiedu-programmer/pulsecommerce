@@ -1,17 +1,17 @@
 {
-  "biggest_drop_stage": "product_view",
-  "biggest_drop_rate": 0.7105571293673276,
+  "biggest_drop_stage": "purchase",
+  "biggest_drop_rate": 0.638700947225981,
   "worst_segment": {
-    "device": "tablet",
-    "channel": "Referral",
-    "overall_conversion": 0.06105610561056106,
-    "sessions": 3636
+    "device": "mobile",
+    "channel": "Display",
+    "overall_conversion": 0.0049856473787581205,
+    "sessions": 6619
   },
   "best_segment": {
-    "device": "tablet",
-    "channel": "Direct",
-    "overall_conversion": 0.06863695090439277,
-    "sessions": 6192
+    "device": "desktop",
+    "channel": "Email",
+    "overall_conversion": 0.13120671154033753,
+    "sessions": 10251
   },
-  "estimated_lost_revenue": 3482.917352493612
+  "estimated_lost_revenue": 101344.41898710922
 }

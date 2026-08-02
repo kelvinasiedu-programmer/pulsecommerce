@@ -31,6 +31,36 @@ from pulsecommerce.logging_utils import get_logger
 
 logger = get_logger(__name__)
 
+#: Ordered funnel stages. A session emits the first `depth` of these.
+FUNNEL_STAGES = np.array(
+    ["session_start", "product_view", "add_to_cart", "checkout_start", "purchase"]
+)
+
+#: Baseline probability of clearing each step, for an average segment. The
+#: product is the end-to-end conversion rate (~3%), in the range real ecommerce
+#: sites report.
+FUNNEL_STEP_PROBS = np.array([0.55, 0.35, 0.50, 0.32])
+
+#: Multipliers on every step. Mobile browses as much but converts worse; paid
+#: social and display send cheaper traffic than email or direct.
+DEVICE_FRICTION: dict[str, float] = {
+    "desktop": 1.15,
+    "mobile": 0.90,
+    "tablet": 1.00,
+}
+CHANNEL_FRICTION: dict[str, float] = {
+    "Email": 1.25,
+    "Direct": 1.20,
+    "Organic Search": 1.05,
+    "Referral": 1.00,
+    "Paid Search": 0.95,
+    "Social": 0.80,
+    "Display": 0.70,
+}
+
+#: Keeps a favourable segment from reaching a certainty of converting.
+MAX_STEP_PROB = 0.95
+
 
 def _seasonality_multiplier(date: pd.Timestamp) -> float:
     """Yearly + weekly pattern. Peaks in Nov/Dec and on weekends."""
@@ -156,10 +186,11 @@ def _generate_orders_and_items(
         for off, h, m in zip(order_day_offsets, order_hours, order_minutes, strict=False)
     ]
 
-    # bias towards repeat buyers: sample users with weights from a zipf-like distribution
-    user_weights = rng.zipf(1.4, size=len(users)).astype(float)
-    user_weights = user_weights / user_weights.sum()
-    order_user_ids = rng.choice(users["user_id"].to_numpy(), size=cfg.n_orders, p=user_weights)
+    order_user_ids = rng.choice(
+        users["user_id"].to_numpy(),
+        size=cfg.n_orders,
+        p=_repeat_buyer_weights(len(users), cfg, rng),
+    )
 
     devices = rng.choice(cfg.devices, size=cfg.n_orders, p=list(cfg.device_weights))
     channels = rng.choice(
@@ -235,53 +266,116 @@ def _generate_events(
     """Synthesize a clickstream with a canonical 5-stage funnel.
 
     Funnel: session_start -> product_view -> add_to_cart -> checkout_start -> purchase
+
+    Sessions are the unit of generation, not events. Each session picks its
+    device and channel once, then walks the funnel and stops at the first stage
+    it fails to clear. That makes the stages properly nested - a session that
+    reached checkout necessarily viewed a product - which is what lets
+    stage-to-stage conversion mean anything.
+
+    Continuation probability is scaled by device and channel, so the
+    device-by-channel conversion asymmetry is a real property of the data rather
+    than sampling noise across otherwise identical segments.
     """
     n_users = len(users)
-    events_per_user = np.clip(rng.poisson(cfg.n_events_per_user_mean, size=n_users), 1, None)
-    total_events = int(events_per_user.sum())
-    logger.info("synthesising %s events across %s users", f"{total_events:,}", f"{n_users:,}")
+
+    # expected events per session = 1 + P(reach stage 2) + P(reach stage 3) + ...
+    reach = np.cumprod(np.concatenate([[1.0], FUNNEL_STEP_PROBS]))
+    sessions_per_user_mean = max(cfg.n_events_per_user_mean / reach.sum(), 1.0)
+
+    sessions_per_user = np.clip(rng.poisson(sessions_per_user_mean, size=n_users), 1, None)
+    n_sessions = int(sessions_per_user.sum())
+
+    session_user_ids = np.repeat(users["user_id"].to_numpy(), sessions_per_user)
+    devices = rng.choice(cfg.devices, size=n_sessions, p=list(cfg.device_weights))
+    channels = rng.choice(
+        cfg.channels, size=n_sessions, p=_normalize([0.28, 0.18, 0.15, 0.12, 0.14, 0.08, 0.05])
+    )
+
+    friction = np.array([DEVICE_FRICTION[d] for d in devices]) * np.array(
+        [CHANNEL_FRICTION[c] for c in channels]
+    )
+
+    # walk the funnel: depth is the number of stages the session cleared
+    depth = np.ones(n_sessions, dtype=np.int64)
+    alive = np.ones(n_sessions, dtype=bool)
+    for step_prob in FUNNEL_STEP_PROBS:
+        p = np.clip(step_prob * friction, 0.0, MAX_STEP_PROB)
+        advanced = alive & (rng.random(n_sessions) < p)
+        depth += advanced
+        alive = advanced
+
+    total_events = int(depth.sum())
+    logger.info(
+        "synthesising %s events across %s sessions / %s users",
+        f"{total_events:,}",
+        f"{n_sessions:,}",
+        f"{n_users:,}",
+    )
 
     start = pd.Timestamp(cfg.start_date)
     end = pd.Timestamp(cfg.end_date)
     total_seconds = int((end - start).total_seconds())
 
-    user_ids = np.repeat(users["user_id"].to_numpy(), events_per_user)
-    seconds = rng.integers(0, total_seconds, size=total_events)
-    event_times = pd.to_datetime(start) + pd.to_timedelta(seconds, unit="s")
+    session_starts = rng.integers(0, total_seconds, size=n_sessions)
+    session_ids = np.arange(1, n_sessions + 1, dtype=np.int64)
 
-    # 5-stage funnel with segment-dependent drop-off
-    stages = np.array(
-        ["session_start", "product_view", "add_to_cart", "checkout_start", "purchase"]
-    )
-    stage_probs = rng.dirichlet([12, 9, 5, 3, 2], size=total_events)
-    stage_idx = np.array([rng.choice(5, p=p) for p in stage_probs])
-    event_type = stages[stage_idx]
+    # expand each session into one row per stage it reached
+    event_session_idx = np.repeat(np.arange(n_sessions), depth)
+    stage_idx = _within_group_index(depth)
 
-    devices = rng.choice(cfg.devices, size=total_events, p=list(cfg.device_weights))
-    channels = rng.choice(
-        cfg.channels, size=total_events, p=_normalize([0.28, 0.18, 0.15, 0.12, 0.14, 0.08, 0.05])
-    )
-
-    session_ids = rng.integers(10**8, 10**9, size=total_events)
+    # stages land a few minutes apart, so ordering within a session is stable
+    offsets = stage_idx * rng.integers(30, 600, size=total_events)
+    event_seconds = session_starts[event_session_idx] + offsets
 
     events = pd.DataFrame(
         {
             "event_id": np.arange(1, total_events + 1, dtype=np.int64),
-            "user_id": user_ids,
-            "session_id": session_ids,
-            "event_type": event_type,
-            "device": devices,
-            "channel": channels,
-            "occurred_at": event_times,
+            "user_id": session_user_ids[event_session_idx],
+            "session_id": session_ids[event_session_idx],
+            "event_type": FUNNEL_STAGES[stage_idx],
+            "device": devices[event_session_idx],
+            "channel": channels[event_session_idx],
+            "occurred_at": pd.to_datetime(start) + pd.to_timedelta(event_seconds, unit="s"),
         }
     )
-    events = events.sort_values(["user_id", "occurred_at"]).reset_index(drop=True)
-    return events
+    return events.sort_values(["user_id", "occurred_at"]).reset_index(drop=True)
+
+
+def _within_group_index(counts: np.ndarray) -> np.ndarray:
+    """For counts [3, 1, 2] return [0, 1, 2, 0, 0, 1] without a Python loop."""
+    total = int(counts.sum())
+    group_starts = np.repeat(np.cumsum(counts) - counts, counts)
+    return np.arange(total) - group_starts
 
 
 def _normalize(weights: list[float]) -> list[float]:
     total = sum(weights)
     return [w / total for w in weights]
+
+
+def _repeat_buyer_weights(
+    n_users: int,
+    cfg: DataGenConfig,
+    rng: np.random.Generator,
+) -> np.ndarray:
+    """Per-user purchase propensity following a Zipf-Mandelbrot law.
+
+    Weight for rank i is ``1 / (i + q) ** a``. The ``q`` offset is what keeps
+    this usable: a plain Zipf law (q=0) concentrates so hard that a handful of
+    customers absorb every order, and sampling raw ``rng.zipf`` *variates* as
+    weights is worse still - that distribution has no finite mean for a < 2, so
+    one freak draw takes essentially the whole probability mass.
+
+    ``q`` scales with the user base so the skew looks the same in the small CI
+    dataset as in the full one. Ranks are shuffled so propensity is
+    uncorrelated with ``user_id``.
+    """
+    offset = n_users * cfg.buyer_rank_offset_frac
+    ranks = np.arange(1, n_users + 1, dtype=float)
+    weights = 1.0 / (ranks + offset) ** cfg.buyer_zipf_exponent
+    rng.shuffle(weights)
+    return weights / weights.sum()
 
 
 def generate(cfg: DataGenConfig | None = None, seed: int = 42) -> GeneratedDataset:

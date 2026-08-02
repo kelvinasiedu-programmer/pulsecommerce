@@ -46,6 +46,8 @@ data/raw/*.parquet
 data/raw/*.csv
 data/processed/*.parquet
 data/processed/*.csv
+data/tableau/*.csv
+data/tableau/manifest.json
 data/warehouse/
 *.duckdb
 *.duckdb.wal
