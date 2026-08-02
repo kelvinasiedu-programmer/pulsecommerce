@@ -1,14 +1,14 @@
 {
-  "generated_at": "2026-08-02T02:32:04+00:00",
+  "generated_at": "2026-08-02T05:47:50+00:00",
   "coverage": {
     "start": "2024-01-01",
-    "end": "2026-03-31"
+    "end": "2026-03-30"
   },
   "tables": [
     {
       "name": "kpi_daily",
       "file": "kpi_daily.csv",
-      "rows": 821,
+      "rows": 820,
       "columns": [
         "metric_date",
         "sessions",
@@ -21,7 +21,7 @@
         "avg_order_value",
         "conversion_rate"
       ],
-      "size_kb": 84.3
+      "size_kb": 84.2
     },
     {
       "name": "orders_fact",

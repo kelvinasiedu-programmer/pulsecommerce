@@ -598,7 +598,7 @@ with bottom_right:
 
 st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
 st.markdown(
-    f"""
+    """
     <div class="pc-section-title">Jump into a layer</div>
     <div class="pc-section-sub">The five analytical surfaces that make up the platform.</div>
     """,
@@ -643,7 +643,7 @@ nav_items = [
 ]
 for row_items in (nav_items[:3], nav_items[3:]):
     cols = st.columns(len(row_items))
-    for col, (n, icon, title, desc, page_path) in zip(cols, row_items):
+    for col, (n, icon, title, desc, page_path) in zip(cols, row_items, strict=True):
         with col:
             st.markdown(
                 f"""

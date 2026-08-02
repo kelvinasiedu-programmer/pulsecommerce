@@ -6,10 +6,10 @@
   "n_treatment": 2135,
   "primary": {
     "name": "conversion_rate",
-    "control_mean": 0.02668475802804161,
-    "treatment_mean": 0.556440281030445,
-    "abs_lift": 0.5297555230024034,
-    "rel_lift": 19.852363751835828,
+    "control_mean": 0.02939846223428313,
+    "treatment_mean": 0.5573770491803278,
+    "abs_lift": 0.5279785869460447,
+    "rel_lift": 17.959394703656997,
     "p_value": 0.0,
     "is_significant": true,
     "is_guardrail": false,
@@ -18,38 +18,38 @@
   "guardrails": [
     {
       "name": "average_order_value",
-      "control_mean": 2.760923790140208,
-      "treatment_mean": 1.9206877166276346,
-      "abs_lift": -0.8402360735125733,
-      "rel_lift": -0.3043314982156402,
-      "p_value": 0.12375067721271253,
+      "control_mean": 3.7307937584803255,
+      "treatment_mean": 3.133711756440281,
+      "abs_lift": -0.5970820020400445,
+      "rel_lift": -0.16004154630173273,
+      "p_value": 0.39307907831428335,
       "is_significant": false,
       "is_guardrail": true,
       "direction_ok": false
     },
     {
       "name": "items_per_order",
-      "control_mean": 0.06637268204432384,
-      "treatment_mean": 0.0471844262295082,
-      "abs_lift": -0.01918825581481564,
-      "rel_lift": -0.2890986957857402,
-      "p_value": 0.127354192170844,
+      "control_mean": 0.07688828584350972,
+      "treatment_mean": 0.07484426229508198,
+      "abs_lift": -0.0020440235484277397,
+      "rel_lift": -0.026584329797492545,
+      "p_value": 0.8920677037847379,
       "is_significant": false,
       "is_guardrail": true,
       "direction_ok": false
     },
     {
       "name": "refund_rate_proxy",
-      "control_mean": 0.0101763907734057,
-      "treatment_mean": 0.00760655737704918,
-      "abs_lift": -0.0025698333963565193,
-      "rel_lift": -0.25252896174863393,
-      "p_value": 0.36653014681986307,
+      "control_mean": 0.009497964721845319,
+      "treatment_mean": 0.010696721311475409,
+      "abs_lift": 0.00119875658963009,
+      "rel_lift": 0.1262119437939109,
+      "p_value": 0.6916201371739736,
       "is_significant": false,
       "is_guardrail": true,
-      "direction_ok": true
+      "direction_ok": false
     }
   ],
   "recommendation": "ship",
-  "rationale": "Primary metric conversion_rate improved by +1985.24% (p=0.000) with no guardrail regressions."
+  "rationale": "Primary metric conversion_rate improved by +1795.94% (p=0.000) with no guardrail regressions."
 }

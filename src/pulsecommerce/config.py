@@ -31,7 +31,9 @@ SQL_DIR: Path = REPO_ROOT / "sql"
 SITE_DIR: Path = REPO_ROOT / "site"
 DASHBOARD_ASSETS: Path = REPO_ROOT / "dashboard" / "assets"
 MODELS_DIR: Path = DATA_DIR / "models"
-WAREHOUSE_PATH: Path = _env_path("PULSECOMMERCE_WAREHOUSE_PATH") or (DATA_DIR / "warehouse" / "pulse.duckdb")
+WAREHOUSE_PATH: Path = _env_path("PULSECOMMERCE_WAREHOUSE_PATH") or (
+    DATA_DIR / "warehouse" / "pulse.duckdb"
+)
 WAREHOUSE_DIR: Path = WAREHOUSE_PATH.parent
 
 

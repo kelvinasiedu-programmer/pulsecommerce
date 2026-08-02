@@ -53,9 +53,7 @@ def _pct_delta(current: float, prior: float) -> float:
     return (current - prior) / prior
 
 
-def _card(
-    metric_id: str, label: str, current: float, prior: float, fmt: str = "number"
-) -> KPICard:
+def _card(metric_id: str, label: str, current: float, prior: float, fmt: str = "number") -> KPICard:
     return KPICard(
         metric_id=metric_id,
         label=label,
