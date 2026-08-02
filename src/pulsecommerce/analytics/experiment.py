@@ -57,6 +57,11 @@ class PromotionExperiment:
         treatment_effect: float = 0.08,
         guardrail_drift: float = -0.015,
     ):
+        """Effect sizes are relative, not absolute.
+
+        `treatment_effect=0.08` is an 8% lift on the control conversion rate,
+        not 8 percentage points. `guardrail_drift=-0.015` is a 1.5% dip in AOV.
+        """
         self.wh = warehouse
         self.assignment_seed = assignment_seed
         self.treatment_effect = treatment_effect
@@ -75,9 +80,15 @@ class PromotionExperiment:
                 u.traffic_source,
                 COUNT(o.order_id)                                  AS orders,
                 COALESCE(SUM(o.order_revenue), 0)                  AS revenue,
-                COALESCE(AVG(o.order_revenue), 0)                  AS avg_order_value,
-                COALESCE(AVG(o.item_count), 0)                     AS items_per_order,
-                COALESCE(AVG(o.is_lost), 0)                        AS refund_rate_proxy,
+                -- Per-order guardrails are undefined for users who never ordered.
+                -- NULL here becomes NaN in pandas, which the t-tests omit; folding
+                -- them in as 0 would drag AOV toward zero with the non-buyer share.
+                CASE WHEN COUNT(o.order_id) > 0 THEN AVG(o.order_revenue) END
+                                                                   AS avg_order_value,
+                CASE WHEN COUNT(o.order_id) > 0 THEN AVG(o.item_count) END
+                                                                   AS items_per_order,
+                CASE WHEN COUNT(o.order_id) > 0 THEN AVG(o.is_lost) END
+                                                                   AS refund_rate_proxy,
                 CASE WHEN COUNT(o.order_id) > 0 THEN 1 ELSE 0 END  AS converted
             FROM dim_customers u
             LEFT JOIN fct_orders o
@@ -103,7 +114,7 @@ class PromotionExperiment:
 
         rng = np.random.default_rng(self.assignment_seed)
         panel = panel.sample(frac=1.0, random_state=self.assignment_seed).reset_index(drop=True)
-        panel["arm"] = np.where(rng.random(len(panel)) < 0.5, "control", "treatment")
+        panel["arm"] = _assign_arms_balanced(panel["converted"].to_numpy(), rng)
 
         # Widen dtypes so assignments don't fail under pandas 2.x strict upcasting.
         panel["converted"] = panel["converted"].astype("int64")
@@ -112,11 +123,9 @@ class PromotionExperiment:
 
         # Inject a simulated lift in treatment's primary metric and small drift on guardrails.
         treat_mask = panel["arm"].eq("treatment").to_numpy()
-        n_treat = int(treat_mask.sum())
         lift = self.treatment_effect
         base = panel.loc[treat_mask, "converted"].to_numpy(dtype=float)
-        boosted = (base + rng.random(n_treat) < 0.5 + lift).astype(np.int64)
-        panel.loc[treat_mask, "converted"] = boosted
+        panel.loc[treat_mask, "converted"] = _apply_relative_lift(base, lift, rng)
         panel.loc[treat_mask, "avg_order_value"] = panel.loc[
             treat_mask, "avg_order_value"
         ].to_numpy() * (1 + self.guardrail_drift)
@@ -179,6 +188,41 @@ class PromotionExperiment:
             recommendation=recommendation,
             rationale=rationale,
         )
+
+
+def _assign_arms_balanced(strata: np.ndarray, rng: np.random.Generator) -> np.ndarray:
+    """Split each stratum evenly between arms, randomising within the stratum.
+
+    Plain coin-flip assignment lets the arms start at different conversion rates.
+    On a high-churn audience that is only ~57 converters per arm, so the starting
+    gap can be larger than the effect being measured and the readout books it as
+    treatment lift. Blocking on the pre-treatment outcome removes that.
+    """
+    arms = np.empty(len(strata), dtype=object)
+    for value in np.unique(strata):
+        idx = rng.permutation(np.flatnonzero(strata == value))
+        half = len(idx) // 2
+        arms[idx[:half]] = "control"
+        arms[idx[half:]] = "treatment"
+    return arms
+
+
+def _apply_relative_lift(base: np.ndarray, lift: float, rng: np.random.Generator) -> np.ndarray:
+    """Raise a binary conversion vector by `lift` in relative terms.
+
+    Existing converters are never flipped back. Moving the group rate from r to
+    r * (1 + lift) means converting a share r * lift / (1 - r) of the users who
+    did not convert.
+    """
+    n = len(base)
+    if n == 0:
+        return base.astype(np.int64)
+    rate = float(base.mean())
+    if rate <= 0.0 or rate >= 1.0:
+        return base.astype(np.int64)
+    flip_p = float(np.clip(rate * lift / (1.0 - rate), 0.0, 1.0))
+    flipped = (rng.random(n) < flip_p).astype(np.int64)
+    return np.maximum(base.astype(np.int64), flipped)
 
 
 def _two_sample_test(

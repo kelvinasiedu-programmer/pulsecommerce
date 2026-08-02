@@ -1,4 +1,49 @@
-from pulsecommerce.analytics.experiment import MetricResult, PromotionExperiment, _decide
+import numpy as np
+import pytest
+
+from pulsecommerce.analytics.experiment import (
+    MetricResult,
+    PromotionExperiment,
+    _apply_relative_lift,
+    _assign_arms_balanced,
+    _decide,
+)
+
+
+def test_balanced_assignment_levels_the_pre_treatment_rate():
+    rng = np.random.default_rng(3)
+    converted = np.array([1] * 121 + [0] * 4001)
+    arms = _assign_arms_balanced(converted, rng)
+    for value in (0, 1):
+        in_stratum = arms[converted == value]
+        n_ctrl = int((in_stratum == "control").sum())
+        n_trt = int((in_stratum == "treatment").sum())
+        assert abs(n_ctrl - n_trt) <= 1, f"stratum {value} split {n_ctrl}/{n_trt}"
+    assert converted[arms == "control"].mean() == pytest.approx(
+        converted[arms == "treatment"].mean(), abs=0.002
+    )
+
+
+def test_relative_lift_never_unconverts_an_existing_converter():
+    base = np.array([1.0] * 50 + [0.0] * 50)
+    out = _apply_relative_lift(base, lift=0.08, rng=np.random.default_rng(0))
+    assert out[base == 1].all(), "a converted user must stay converted"
+
+
+def test_relative_lift_moves_rate_by_the_requested_proportion():
+    rng = np.random.default_rng(7)
+    base = (rng.random(200_000) < 0.03).astype(float)
+    out = _apply_relative_lift(base, lift=0.08, rng=rng)
+    expected = base.mean() * 1.08
+    assert out.mean() == pytest.approx(expected, rel=0.05)
+
+
+def test_relative_lift_is_a_noop_on_degenerate_rates():
+    rng = np.random.default_rng(1)
+    all_zero = np.zeros(100)
+    all_one = np.ones(100)
+    assert _apply_relative_lift(all_zero, 0.08, rng).sum() == 0
+    assert _apply_relative_lift(all_one, 0.08, rng).sum() == 100
 
 
 def test_experiment_produces_recommendation(warehouse):
