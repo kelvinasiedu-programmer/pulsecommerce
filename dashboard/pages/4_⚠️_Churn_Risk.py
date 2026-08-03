@@ -68,6 +68,10 @@ churn_rate = metrics.get("churn_rate", 0)
 auc_xgb = metrics.get("roc_auc_xgb", 0)
 auc_log = metrics.get("roc_auc_logreg", 0)
 avg_precision = metrics.get("average_precision_xgb", 0)
+champion_name = "XGBoost" if auc_xgb >= auc_log else "Logistic"
+champion_auc = max(auc_xgb, auc_log)
+challenger_name = "Logistic" if champion_name == "XGBoost" else "XGBoost"
+challenger_auc = auc_log if champion_name == "XGBoost" else auc_xgb
 
 high_risk = scores[scores["churn_risk"] >= 0.7]
 n_high = len(high_risk)
@@ -77,9 +81,18 @@ kpi_row([
     {"label": "Baseline churn rate", "value": f"{churn_rate * 100:.1f}%"},
     {"label": "High-risk customers", "value": f"{n_high:,}", "delta": "risk ≥ 0.70"},
     {"label": "Revenue at risk", "value": f"${revenue_at_risk:,.0f}", "delta": "high-risk LTV sum"},
-    {"label": "Model ROC-AUC", "value": f"{auc_xgb:.3f}", "delta": f"Logistic: {auc_log:.3f}"},
+    {
+        "label": "Champion model",
+        "value": f"{champion_name} ({champion_auc:.3f})",
+        "delta": f"{challenger_name}: {challenger_auc:.3f}",
+    },
 ])
-st.caption(f"Average precision (XGBoost): **{avg_precision:.3f}**")
+if champion_name == "XGBoost":
+    st.caption(f"Average precision (champion model): **{avg_precision:.3f}**")
+else:
+    st.caption(
+        f"Champion model is **{champion_name}** on ROC-AUC. XGBoost reference average precision: **{avg_precision:.3f}**"
+    )
 
 st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
 

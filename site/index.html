@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PulseCommerce - Ecommerce Analytics | Kelvin Asiedu</title>
+<meta name="description" content="Tableau Public dashboards on a synthetic 25,000-customer ecommerce dataset: business health, funnel drop-off and cohort retention, built on a DuckDB warehouse.">
+<link rel="preconnect" href="https://public.tableau.com">
+<link rel="stylesheet" href="./assets/styles.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='26' font-size='26'>&#128200;</text></svg>">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap topbar-inner">
+    <a class="brand" href="#top">
+      <span class="brand-mark">PC</span>
+      <span class="brand-text">PulseCommerce</span>
+    </a>
+    <nav class="topnav">
+      <a href="#dashboards">Dashboards</a>
+      <a href="#build">How it's built</a>
+      <a id="nav-repo" href="#" rel="noopener">Source</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+
+  <section class="hero">
+    <div class="wrap">
+      <p class="eyebrow">Analytics portfolio</p>
+      <h1>Five questions about an ecommerce business,<br>answered end to end.</h1>
+      <p class="lede">
+        A synthetic but statistically realistic dataset of 25,000 customers and 95,000
+        orders, modelled through a layered SQL warehouse and published as interactive
+        Tableau dashboards. Three of the five analyses live here. The forecasting and
+        churn models live in the Python app.
+      </p>
+      <div class="cta-row">
+        <a class="btn btn-primary" href="#dashboards">See the dashboards</a>
+        <a class="btn btn-ghost" id="cta-python" href="#" rel="noopener">Python app: forecasting + churn</a>
+        <a class="btn btn-ghost" id="cta-repo" href="#" rel="noopener">Read the code</a>
+      </div>
+      <p class="coverage" id="coverage" hidden></p>
+    </div>
+  </section>
+
+  <section id="dashboards" class="section">
+    <div class="wrap">
+      <div class="tabs" role="tablist" aria-label="Dashboards" id="tabs"></div>
+      <div id="panels"></div>
+    </div>
+  </section>
+
+  <section id="build" class="section section-alt">
+    <div class="wrap">
+      <h2>How it's built</h2>
+      <p class="section-lede">
+        The dashboards are the last step, not the whole project. Everything upstream is
+        reproducible from a single command.
+      </p>
+
+      <ol class="pipeline">
+        <li>
+          <span class="step-n">1</span>
+          <h3>Generate</h3>
+          <p>
+            A seeded generator produces users, products, orders and clickstream events
+            with weekly and annual seasonality, a Q4 holiday lift, device-by-channel
+            conversion asymmetry, and a Zipf-Mandelbrot repeat-buyer skew.
+          </p>
+        </li>
+        <li>
+          <span class="step-n">2</span>
+          <h3>Model</h3>
+          <p>
+            DuckDB warehouse with staging, marts and metrics layers kept in separate
+            SQL files, laid out the way a dbt project would be. One definition of
+            revenue, referenced everywhere.
+          </p>
+        </li>
+        <li>
+          <span class="step-n">3</span>
+          <h3>Analyse</h3>
+          <p>
+            Five Python layers on top of the warehouse: KPIs, funnel, demand forecast
+            (seasonal-naive vs Holt-Winters vs XGBoost), churn (logistic + XGBoost on
+            RFM features) and a simulated A/B readout with guardrails.
+          </p>
+        </li>
+        <li>
+          <span class="step-n">4</span>
+          <h3>Publish</h3>
+          <p>
+            <code>pulsecommerce tableau</code> flattens the warehouse into tidy CSVs at
+            a grain Tableau can still aggregate, so the workbooks stay interactive
+            rather than rendering numbers Python already decided.
+          </p>
+        </li>
+      </ol>
+
+      <div class="stack">
+        <h3>Stack</h3>
+        <ul class="chips">
+          <li>DuckDB</li><li>SQL</li><li>Python</li><li>pandas</li>
+          <li>scikit-learn</li><li>XGBoost</li><li>statsmodels</li>
+          <li>Tableau Public</li><li>Streamlit</li><li>Docker</li>
+          <li>pytest</li><li>GitHub Actions</li>
+        </ul>
+      </div>
+
+      <p class="caveat">
+        The dataset is synthetic, so the findings are illustrative. The point is the
+        plumbing, not the numbers.
+      </p>
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <div class="wrap footer-inner">
+    <span id="footer-author"></span>
+    <span class="footer-links">
+      <a id="footer-repo" href="#" rel="noopener">GitHub</a>
+      <a id="footer-app" href="#" rel="noopener">Python app</a>
+    </span>
+  </div>
+</footer>
+
+<script type="module" src="https://public.tableau.com/javascripts/api/tableau.embedding.3.latest.min.js"></script>
+<script type="module" src="./assets/app.js"></script>
+
+</body>
+</html>

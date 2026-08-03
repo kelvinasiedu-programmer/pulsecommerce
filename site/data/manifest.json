@@ -1,0 +1,97 @@
+{
+  "generated_at": "2026-08-02T05:47:50+00:00",
+  "coverage": {
+    "start": "2024-01-01",
+    "end": "2026-03-30"
+  },
+  "tables": [
+    {
+      "name": "kpi_daily",
+      "file": "kpi_daily.csv",
+      "rows": 820,
+      "columns": [
+        "metric_date",
+        "sessions",
+        "purchase_sessions",
+        "orders",
+        "revenue",
+        "margin",
+        "items_sold",
+        "cancelled_orders",
+        "avg_order_value",
+        "conversion_rate"
+      ],
+      "size_kb": 84.2
+    },
+    {
+      "name": "orders_fact",
+      "file": "orders_fact.csv",
+      "rows": 256960,
+      "columns": [
+        "order_id",
+        "user_id",
+        "order_date",
+        "device",
+        "channel",
+        "country",
+        "customer_segment",
+        "category",
+        "brand",
+        "status",
+        "status_group",
+        "revenue",
+        "cost",
+        "margin",
+        "discount_pct"
+      ],
+      "size_kb": 28622.2
+    },
+    {
+      "name": "funnel_stages",
+      "file": "funnel_stages.csv",
+      "rows": 12390,
+      "columns": [
+        "week_start",
+        "device",
+        "channel",
+        "stage_order",
+        "stage",
+        "sessions_reached"
+      ],
+      "size_kb": 578.4
+    },
+    {
+      "name": "funnel_segments",
+      "file": "funnel_segments.csv",
+      "rows": 21,
+      "columns": [
+        "device",
+        "channel",
+        "sessions",
+        "product_views",
+        "add_to_carts",
+        "checkout_starts",
+        "purchases",
+        "view_rate",
+        "cart_rate",
+        "checkout_rate",
+        "purchase_rate",
+        "overall_conversion"
+      ],
+      "size_kb": 3.1
+    },
+    {
+      "name": "cohort_retention",
+      "file": "cohort_retention.csv",
+      "rows": 378,
+      "columns": [
+        "cohort_month",
+        "month_number",
+        "active_users",
+        "cohort_size",
+        "retention_rate"
+      ],
+      "size_kb": 15.2
+    }
+  ]
+}

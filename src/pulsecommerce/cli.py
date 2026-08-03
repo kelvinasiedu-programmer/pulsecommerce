@@ -5,6 +5,7 @@ Commands:
   pulsecommerce warehouse           # build DuckDB warehouse
   pulsecommerce pipeline            # run all 5 analytical layers
   pulsecommerce all                 # generate + warehouse + pipeline
+  pulsecommerce tableau             # export the Tableau Public CSV bundle
   pulsecommerce version
 """
 
@@ -16,6 +17,7 @@ import sys
 from pulsecommerce._version import __version__
 from pulsecommerce.config import DATA_GEN, SmallDataGenConfig
 from pulsecommerce.data.generator import generate_and_write
+from pulsecommerce.exports.tableau import export_tableau
 from pulsecommerce.logging_utils import get_logger
 from pulsecommerce.pipeline import run_pipeline
 from pulsecommerce.warehouse import Warehouse
@@ -38,6 +40,7 @@ def build_parser() -> argparse.ArgumentParser:
     a.add_argument("--seed", type=int, default=42)
     a.add_argument("--small", action="store_true")
 
+    sub.add_parser("tableau", help="export CSVs for the Tableau Public workbooks")
     sub.add_parser("version", help="print version")
     return parser
 
@@ -60,6 +63,9 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.command in ("pipeline", "all"):
         run_pipeline()
+
+    if args.command == "tableau":
+        export_tableau()
 
     logger.info("done")
     return 0

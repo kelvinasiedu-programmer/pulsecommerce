@@ -16,7 +16,11 @@ through five questions on top of it: is the business healthy, where does the
 funnel leak, what does demand look like next, who is about to churn, and did
 the last A/B test actually move the needle.
 
-Live demo: [kelvin-programmer-pulsecommerce.hf.space](https://kelvin-programmer-pulsecommerce.hf.space)
+Three of the five are published as interactive Tableau Public dashboards on a
+static site; all five run in the Python app.
+
+- Dashboards: `site/` (see [`site/README.md`](site/README.md) to deploy)
+- Python app: [kelvin-programmer-pulsecommerce.hf.space](https://kelvin-programmer-pulsecommerce.hf.space)
 
 [![CI](https://github.com/kelvinasiedu-programmer/pulsecommerce/actions/workflows/ci.yml/badge.svg)](https://github.com/kelvinasiedu-programmer/pulsecommerce/actions/workflows/ci.yml)
 
@@ -53,6 +57,26 @@ streamlit run dashboard/Home.py
 
 Open `http://localhost:8501`. `docker compose up --build` works too.
 
+DuckDB and file-syncing folders don't mix - the lock file confuses OneDrive and
+Dropbox and you get intermittent corruption. If the repo lives in a synced
+folder, put the runtime data somewhere local first:
+
+```powershell
+$env:PULSECOMMERCE_DATA_DIR = "C:\dev\pulsecommerce-data"
+```
+
+`PULSECOMMERCE_WAREHOUSE_PATH` overrides the DuckDB file location on its own if
+you need finer control.
+
+For the Tableau side:
+
+```bash
+python -m pulsecommerce.cli tableau      # writes data/tableau/*.csv
+python -m http.server 8000 --directory site
+```
+
+[`tableau/BUILD.md`](tableau/BUILD.md) has the workbook build steps.
+
 For a smaller CI-sized dataset, `python -m pulsecommerce.cli generate --small`
 gives you ~2.5k users instead of the default ~25k.
 
@@ -68,6 +92,10 @@ flowchart LR
     F --> G[Layers 1-5]
     G --> H[(Processed Parquet + JSON)]
     H --> I[Streamlit multi-page app]
+    C --> J[Tableau CSV export]
+    H --> J
+    J --> K[Tableau Public workbooks]
+    K --> L[Static site]
 ```
 
 SQL is split into `staging → marts → metrics`, which is the layout I'd use
@@ -92,8 +120,9 @@ pulsecommerce/
 ├── src/pulsecommerce/
 │   ├── warehouse.py            # DuckDB adapter
 │   ├── pipeline.py             # orchestrates the 5 layers
-│   ├── cli.py                  # pulsecommerce generate|warehouse|pipeline|all
+│   ├── cli.py                  # generate|warehouse|pipeline|all|tableau
 │   ├── data/generator.py       # synthetic dataset
+│   ├── exports/tableau.py      # flattens the warehouse to CSV for Tableau
 │   └── analytics/
 │       ├── health.py
 │       ├── funnel.py
@@ -102,6 +131,8 @@ pulsecommerce/
 │       └── experiment.py       # Welch t-test + guardrails
 ├── sql/                        # staging / marts / metrics
 ├── dashboard/                  # Streamlit multi-page app
+├── site/                       # static site embedding the Tableau workbooks
+├── tableau/BUILD.md            # how the workbooks are built
 ├── tests/
 ├── docs/
 └── .github/workflows/ci.yml
@@ -111,9 +142,9 @@ pulsecommerce/
 
 DuckDB for the warehouse (zero-config, SQL-native, bundles into the wheel),
 layered SQL transformations, scikit-learn + XGBoost + statsmodels for
-modelling, Streamlit + Plotly for the dashboard, pytest / ruff / mypy, and
-GitHub Actions for CI across Python 3.10-3.12. Docker for reproducible
-deploy.
+modelling, Streamlit + Plotly for the Python app, Tableau Public for the
+published dashboards, pytest / ruff / mypy, and GitHub Actions for CI across
+Python 3.10-3.12. Docker for reproducible deploy.
 
 ## Tests
 

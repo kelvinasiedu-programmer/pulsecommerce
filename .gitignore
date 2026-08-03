@@ -30,6 +30,7 @@ ENV/
 
 # Testing
 .pytest_cache/
+.tmp/
 .coverage
 .coverage.*
 htmlcov/
@@ -46,6 +47,8 @@ data/raw/*.parquet
 data/raw/*.csv
 data/processed/*.parquet
 data/processed/*.csv
+data/tableau/*.csv
+data/tableau/manifest.json
 data/warehouse/
 *.duckdb
 *.duckdb.wal
@@ -64,6 +67,7 @@ Thumbs.db
 .idea/
 *.swp
 *.swo
+.worktrees/
 
 # Secrets
 .env

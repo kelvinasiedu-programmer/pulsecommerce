@@ -34,3 +34,8 @@ def test_daily_kpis_monotonic_dates(warehouse):
     assert df["metric_date"].is_monotonic_increasing
     assert (df["sessions"] >= 0).all()
     assert (df["orders"] >= 0).all()
+
+
+def test_daily_kpis_do_not_report_orders_without_sessions(warehouse):
+    df = warehouse.table("daily_kpis")
+    assert df.loc[df["orders"] > 0, "sessions"].gt(0).all()

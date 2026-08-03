@@ -66,6 +66,7 @@ kpi_row([
     {"label": "Total projected revenue", "value": f"${total_forecast_rev:,.0f}"},
     {"label": "Best model MAPE", "value": f"{best_mape * 100:.1f}%"},
 ])
+st.caption("Winning models are chosen per category from held-out backtests. Use the MAPE table below as the source of truth.")
 
 st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
 
@@ -150,6 +151,8 @@ if not mape.empty:
         fig.update_xaxes(showticklabels=False, showgrid=False)
         fig.update_yaxes(title_text=None)
         st.plotly_chart(fig, use_container_width=True)
+        if not winners.empty and winners["Wins"].max() == len(mape):
+            st.info("One model wins every category in this sample. Validate that pattern against the backtest error table before treating it as structural.")
 
 
 # --------------------------------------------------------------------------- #

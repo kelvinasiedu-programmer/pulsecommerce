@@ -1,4 +1,4 @@
-.PHONY: help install install-dev clean generate warehouse pipeline app test lint format typecheck docker-build docker-run ci
+.PHONY: help install install-dev clean generate warehouse pipeline app site tableau test lint format typecheck docker-build docker-run ci
 
 PYTHON := python
 PIP := $(PYTHON) -m pip
@@ -11,6 +11,8 @@ help:
 	@echo "  warehouse     Build DuckDB warehouse (staging + marts + metrics)"
 	@echo "  pipeline      Run the full analytical pipeline (all 5 layers)"
 	@echo "  app           Launch the Streamlit dashboard"
+	@echo "  tableau       Export the Tableau Public CSV bundle"
+	@echo "  site          Serve the static Tableau site on :8000"
 	@echo "  test          Run pytest with coverage"
 	@echo "  lint          Ruff check"
 	@echo "  format        Ruff format"
@@ -39,6 +41,12 @@ pipeline:
 app:
 	streamlit run dashboard/Home.py
 
+tableau:
+	$(PYTHON) -m pulsecommerce.cli tableau
+
+site:
+	$(PYTHON) -m http.server 8000 --directory site
+
 test:
 	pytest
 
@@ -63,4 +71,4 @@ clean:
 	rm -rf .pytest_cache .ruff_cache .mypy_cache htmlcov .coverage
 	rm -rf build dist *.egg-info
 	find . -type d -name __pycache__ -exec rm -rf {} +
-	rm -rf data/raw/*.parquet data/processed/*.parquet data/warehouse
+	rm -rf data/raw/*.parquet data/processed/*.parquet data/warehouse data/tableau/*.csv

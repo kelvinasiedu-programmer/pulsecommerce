@@ -79,9 +79,10 @@ quote-style = "double"
 
 [tool.pytest.ini_options]
 minversion = "8.0"
-addopts = "-ra --strict-markers --cov=pulsecommerce --cov-report=term-missing"
+addopts = "-ra --strict-markers -p no:cacheprovider --cov=pulsecommerce --cov-report=term-missing"
 testpaths = ["tests"]
 pythonpath = ["src"]
+cache_dir = ".tmp/pytest_cache"
 
 [tool.mypy]
 python_version = "3.10"

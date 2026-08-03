@@ -1,0 +1,233 @@
+/* PulseCommerce site.
+   Palette mirrors dashboard/theme.py so the Tableau site and the Streamlit app
+   read as one project. Light-only on purpose: Tableau Public renders its vizzes
+   light, and a dark shell around a light viz looks broken. */
+
+:root {
+  --primary: #4F46E5;
+  --primary-dark: #3730A3;
+  --primary-light: #EEF2FF;
+  --accent: #0EA5E9;
+  --bg: #F8FAFC;
+  --surface: #FFFFFF;
+  --border: #E5E7EB;
+  --border-strong: #D1D5DB;
+  --text: #0F172A;
+  --text-muted: #475569;
+  --text-subtle: #64748B;
+  --success: #10B981;
+
+  --wrap: 1180px;
+  --radius: 12px;
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, .06);
+  --shadow-md: 0 4px 16px rgba(15, 23, 42, .08);
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; scroll-padding-top: 72px; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+        "Helvetica Neue", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3 { line-height: 1.2; margin: 0 0 .5em; letter-spacing: -.02em; }
+h1 { font-size: clamp(1.9rem, 4.2vw, 3rem); font-weight: 700; }
+h2 { font-size: clamp(1.5rem, 3vw, 2rem); font-weight: 650; }
+h3 { font-size: 1.06rem; font-weight: 650; }
+p { margin: 0 0 1rem; }
+a { color: var(--primary); }
+
+code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: .9em;
+  background: var(--primary-light);
+  color: var(--primary-dark);
+  padding: .12em .4em;
+  border-radius: 5px;
+}
+
+.wrap { max-width: var(--wrap); margin: 0 auto; padding: 0 24px; }
+
+/* ---------- top bar ---------- */
+
+.topbar {
+  position: sticky; top: 0; z-index: 50;
+  background: rgba(255, 255, 255, .88);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--border);
+}
+.topbar-inner {
+  display: flex; align-items: center; justify-content: space-between;
+  height: 60px; gap: 16px;
+}
+.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--text); }
+.brand-mark {
+  display: grid; place-items: center;
+  width: 30px; height: 30px; border-radius: 8px;
+  background: linear-gradient(135deg, var(--primary), #7C3AED);
+  color: #fff; font-size: .78rem; font-weight: 700; letter-spacing: .02em;
+}
+.brand-text { font-weight: 650; letter-spacing: -.01em; }
+.topnav { display: flex; gap: 22px; font-size: .92rem; }
+.topnav a { color: var(--text-muted); text-decoration: none; }
+.topnav a:hover { color: var(--primary); }
+
+/* ---------- hero ---------- */
+
+.hero {
+  padding: 68px 0 52px;
+  background: linear-gradient(160deg, #EEF2FF 0%, #F5F3FF 44%, var(--bg) 100%);
+  border-bottom: 1px solid var(--border);
+}
+.eyebrow {
+  text-transform: uppercase; letter-spacing: .1em;
+  font-size: .74rem; font-weight: 650; color: var(--primary);
+  margin-bottom: .9rem;
+}
+.lede {
+  max-width: 68ch; font-size: 1.06rem; color: var(--text-muted);
+  margin-top: 1.1rem;
+}
+.cta-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 1.6rem; }
+.btn {
+  display: inline-block; padding: .62rem 1.15rem;
+  border-radius: 9px; font-size: .93rem; font-weight: 600;
+  text-decoration: none; border: 1px solid transparent;
+  transition: transform .12s ease, box-shadow .12s ease, background .12s ease;
+}
+.btn:hover { transform: translateY(-1px); }
+.btn-primary { background: var(--primary); color: #fff; box-shadow: var(--shadow-sm); }
+.btn-primary:hover { background: var(--primary-dark); box-shadow: var(--shadow-md); }
+.btn-ghost { background: var(--surface); color: var(--text); border-color: var(--border-strong); }
+.btn-ghost:hover { border-color: var(--primary); color: var(--primary); }
+.coverage {
+  margin-top: 1.5rem; font-size: .85rem; color: var(--text-subtle);
+  display: flex; align-items: center; gap: 8px;
+}
+.coverage::before {
+  content: ""; width: 7px; height: 7px; border-radius: 50%;
+  background: var(--success); flex: none;
+}
+
+/* ---------- sections ---------- */
+
+.section { padding: 56px 0; }
+.section-alt { background: var(--surface); border-top: 1px solid var(--border); }
+.section-lede { max-width: 66ch; color: var(--text-muted); }
+
+/* ---------- tabs ---------- */
+
+.tabs {
+  display: flex; gap: 6px; flex-wrap: wrap;
+  border-bottom: 1px solid var(--border); margin-bottom: 22px;
+}
+.tab {
+  appearance: none; background: none; border: 0;
+  border-bottom: 2px solid transparent;
+  padding: .7rem 1rem; margin-bottom: -1px;
+  font: inherit; font-size: .95rem; font-weight: 600;
+  color: var(--text-subtle); cursor: pointer;
+}
+.tab:hover { color: var(--text); }
+.tab[aria-selected="true"] { color: var(--primary); border-bottom-color: var(--primary); }
+
+.panel[hidden] { display: none; }
+.panel-head { margin-bottom: 18px; }
+.panel-head h2 { margin-bottom: .35rem; }
+.panel-head p { max-width: 72ch; color: var(--text-muted); margin: 0; }
+
+/* ---------- viz frame ---------- */
+
+.viz-frame {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+.viz-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.viz-scroll tableau-viz { display: block; min-width: 800px; }
+
+/* placeholder shown while a workbook URL is still null */
+.viz-placeholder {
+  display: grid; place-items: center; text-align: center;
+  padding: 64px 24px; min-height: 340px;
+  background:
+    repeating-linear-gradient(45deg, #FAFBFF 0 12px, #F3F5FD 12px 24px);
+}
+.viz-placeholder .ph-badge {
+  display: inline-block; padding: .28rem .7rem; border-radius: 999px;
+  background: #FFFBEB; color: #92400E; border: 1px solid #FDE68A;
+  font-size: .75rem; font-weight: 650; letter-spacing: .02em;
+  text-transform: uppercase; margin-bottom: 1rem;
+}
+.viz-placeholder h3 { margin-bottom: .4rem; }
+.viz-placeholder p { color: var(--text-muted); max-width: 46ch; margin: 0 auto .4rem; }
+.viz-placeholder code { display: inline-block; margin-top: .3rem; }
+
+/* ---------- pipeline ---------- */
+
+.pipeline {
+  list-style: none; padding: 0; margin: 32px 0 0;
+  display: grid; gap: 18px;
+  grid-template-columns: repeat(auto-fit, minmax(238px, 1fr));
+  counter-reset: none;
+}
+.pipeline li {
+  position: relative;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 22px 20px 18px;
+}
+.step-n {
+  display: grid; place-items: center;
+  width: 26px; height: 26px; border-radius: 7px;
+  background: var(--primary-light); color: var(--primary-dark);
+  font-size: .8rem; font-weight: 700; margin-bottom: .7rem;
+}
+.pipeline p { color: var(--text-muted); font-size: .93rem; margin: 0; }
+
+.stack { margin-top: 40px; }
+.chips { list-style: none; display: flex; flex-wrap: wrap; gap: 8px; padding: 0; margin: .8rem 0 0; }
+.chips li {
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 999px; padding: .3rem .78rem;
+  font-size: .84rem; color: var(--text-muted);
+}
+.caveat {
+  margin-top: 34px; padding: 14px 18px;
+  border-left: 3px solid var(--border-strong);
+  color: var(--text-subtle); font-size: .9rem;
+}
+
+/* ---------- footer ---------- */
+
+.footer { border-top: 1px solid var(--border); background: var(--surface); padding: 26px 0; }
+.footer-inner {
+  display: flex; justify-content: space-between; align-items: center;
+  flex-wrap: wrap; gap: 12px;
+  font-size: .88rem; color: var(--text-subtle);
+}
+.footer-links { display: flex; gap: 18px; }
+.footer-links a { color: var(--text-muted); text-decoration: none; }
+.footer-links a:hover { color: var(--primary); }
+
+@media (max-width: 640px) {
+  .hero { padding: 48px 0 40px; }
+  .topnav { gap: 14px; font-size: .86rem; }
+  .topnav a[href="#build"] { display: none; }
+  .section { padding: 40px 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .btn { transition: none; }
+  .btn:hover { transform: none; }
+}

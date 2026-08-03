@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -14,15 +15,26 @@ def _repo_root() -> Path:
     return here.parents[3]
 
 
+def _env_path(name: str) -> Path | None:
+    value = os.getenv(name)
+    if not value:
+        return None
+    return Path(value).expanduser()
+
+
 REPO_ROOT: Path = _repo_root()
-DATA_DIR: Path = REPO_ROOT / "data"
+DATA_DIR: Path = _env_path("PULSECOMMERCE_DATA_DIR") or (REPO_ROOT / "data")
 RAW_DIR: Path = DATA_DIR / "raw"
 PROCESSED_DIR: Path = DATA_DIR / "processed"
-WAREHOUSE_DIR: Path = DATA_DIR / "warehouse"
+TABLEAU_DIR: Path = DATA_DIR / "tableau"
 SQL_DIR: Path = REPO_ROOT / "sql"
+SITE_DIR: Path = REPO_ROOT / "site"
 DASHBOARD_ASSETS: Path = REPO_ROOT / "dashboard" / "assets"
 MODELS_DIR: Path = DATA_DIR / "models"
-WAREHOUSE_PATH: Path = WAREHOUSE_DIR / "pulse.duckdb"
+WAREHOUSE_PATH: Path = _env_path("PULSECOMMERCE_WAREHOUSE_PATH") or (
+    DATA_DIR / "warehouse" / "pulse.duckdb"
+)
+WAREHOUSE_DIR: Path = WAREHOUSE_PATH.parent
 
 
 @dataclass(frozen=True)
@@ -35,6 +47,12 @@ class DataGenConfig:
     n_events_per_user_mean: float = 18.0
     start_date: str = "2024-01-01"
     end_date: str = "2026-03-31"
+    # Repeat-buyer skew (Zipf-Mandelbrot): weight ~ 1 / (rank + offset) ** exponent,
+    # where offset = n_users * buyer_rank_offset_frac so the shape holds at any
+    # dataset size. Tuned so ~64% of users ever order, the top 20% of buyers drive
+    # ~72% of orders, and the busiest customer stays under ~100 orders.
+    buyer_zipf_exponent: float = 1.6
+    buyer_rank_offset_frac: float = 0.032
     channels: tuple[str, ...] = (
         "Organic Search",
         "Paid Search",
@@ -103,5 +121,13 @@ EXPERIMENT = ExperimentConfig()
 
 
 def ensure_dirs() -> None:
-    for p in (DATA_DIR, RAW_DIR, PROCESSED_DIR, WAREHOUSE_DIR, MODELS_DIR, DASHBOARD_ASSETS):
+    for p in (
+        DATA_DIR,
+        RAW_DIR,
+        PROCESSED_DIR,
+        WAREHOUSE_DIR,
+        TABLEAU_DIR,
+        MODELS_DIR,
+        DASHBOARD_ASSETS,
+    ):
         p.mkdir(parents=True, exist_ok=True)

@@ -22,7 +22,7 @@ order_day AS (
     GROUP BY order_date
 )
 SELECT
-    COALESCE(s.metric_date, o.metric_date)  AS metric_date,
+    s.metric_date                           AS metric_date,
     COALESCE(s.sessions, 0)                 AS sessions,
     COALESCE(s.purchase_sessions, 0)        AS purchase_sessions,
     COALESCE(o.orders, 0)                   AS orders,
@@ -35,5 +35,5 @@ SELECT
          THEN COALESCE(s.purchase_sessions, 0) * 1.0 / s.sessions
          ELSE NULL END                      AS conversion_rate
 FROM session_day s
-FULL OUTER JOIN order_day o ON s.metric_date = o.metric_date
+LEFT JOIN order_day o ON s.metric_date = o.metric_date
 ORDER BY metric_date;

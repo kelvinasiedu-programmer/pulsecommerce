@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import json
 import sys
+from datetime import datetime
 from pathlib import Path
 
 import pandas as pd
@@ -206,35 +207,15 @@ st.markdown(
 )
 
 
-days_of_history = len(daily) if not daily.empty else 0
+today = datetime.now().strftime("%A, %d %B %Y")
 
 st.markdown(
     f"""
     <div class="hp-welcome">
       <div>
         <div class="hp-eyebrow">Portfolio project · synthetic dataset</div>
-        <div class="hp-hi">PulseCommerce Overview</div>
-        <div class="hp-sub">Trailing 28-day state of the store, summarized across the five analytical layers.</div>
-      </div>
-      <div class="hp-actions">
-        <span class="hp-pill" aria-label="Data window">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-               stroke="currentColor" stroke-width="2" stroke-linecap="round"
-               stroke-linejoin="round" aria-hidden="true">
-            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-            <line x1="16" y1="2" x2="16" y2="6"></line>
-            <line x1="8" y1="2" x2="8" y2="6"></line>
-            <line x1="3" y1="10" x2="21" y2="10"></line>
-          </svg>
-          {days_of_history} days of history
-        </span>
-        <a class="hp-pill hp-pill-link" href="https://github.com/kelvinasiedu-programmer/pulsecommerce"
-           target="_blank" rel="noopener noreferrer" aria-label="Open source repository on GitHub">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-            <path d="M12 .5C5.73.5.5 5.73.5 12a11.5 11.5 0 0 0 7.86 10.93c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.36-3.88-1.36-.52-1.32-1.27-1.67-1.27-1.67-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.18 1.76 1.18 1.02 1.75 2.68 1.24 3.34.95.1-.74.4-1.25.73-1.54-2.56-.29-5.25-1.28-5.25-5.7 0-1.26.45-2.29 1.18-3.1-.12-.3-.51-1.46.11-3.05 0 0 .96-.31 3.15 1.18a10.97 10.97 0 0 1 5.74 0c2.19-1.49 3.15-1.18 3.15-1.18.62 1.59.23 2.75.11 3.05.74.81 1.18 1.84 1.18 3.1 0 4.43-2.69 5.4-5.26 5.69.41.35.78 1.05.78 2.12v3.14c0 .31.21.67.8.56A11.5 11.5 0 0 0 23.5 12C23.5 5.73 18.27.5 12 .5z"/>
-          </svg>
-          GitHub
-        </a>
+        <div class="hp-hi">Commerce overview</div>
+        <div class="hp-sub">Trailing 28-day performance snapshot · {today}</div>
       </div>
     </div>
     """,
@@ -281,7 +262,12 @@ kpi_icons = {
 
 # Pick the 4 headline KPIs
 headline_keys = ["revenue", "orders", "conversion_rate", "aov"]
-id_col = "metric" if "metric" in cards.columns else ("id" if "id" in cards.columns else None)
+id_col = (
+    "metric_id"
+    if "metric_id" in cards.columns
+    else ("metric" if "metric" in cards.columns else ("id" if "id" in cards.columns else None))
+)
+cards_by_key = {}
 if id_col:
     cards_by_key = {row[id_col]: row for _, row in cards.iterrows()}
     headline = [cards_by_key[k] for k in headline_keys if k in cards_by_key]
@@ -325,8 +311,10 @@ with left:
     st.markdown(
         """
         <div class="hp-panel">
-          <h4>Revenue insights</h4>
-          <div class="sub">Daily revenue with the peak-performing day highlighted.</div>
+          <div>
+            <h4>Revenue insights</h4>
+            <div class="sub">Daily revenue with the peak-performing day highlighted.</div>
+          </div>
         </div>
         """,
         unsafe_allow_html=True,
@@ -487,7 +475,7 @@ with bottom_left:
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
           <div>
             <h4>Top performing days</h4>
-            <div class="sub">Your best-converting days in the trailing 28-day window.</div>
+            <div class="sub">Highest-revenue days in the trailing 28-day window.</div>
           </div>
         </div>
         """,
@@ -496,6 +484,7 @@ with bottom_left:
     if not daily.empty:
         top_days = (
             daily.assign(metric_date=pd.to_datetime(daily["metric_date"]))
+            .query("sessions > 0")
             .nlargest(7, "revenue")
             .sort_values("metric_date", ascending=False)
         )
@@ -609,43 +598,83 @@ with bottom_right:
 
 st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
 st.markdown(
-    f"""
+    """
     <div class="pc-section-title">Jump into a layer</div>
     <div class="pc-section-sub">The five analytical surfaces that make up the platform.</div>
     """,
     unsafe_allow_html=True,
 )
 nav_items = [
-    ("01", "📊", "Business Health", "Revenue, AOV, conversion - period vs. period with channel/category mix."),
-    ("02", "🔻", "Funnel Drop-off", "Five-stage event funnel with segmented device × channel heatmap."),
-    ("03", "📈", "Demand Forecast", "Seasonal-naive vs Holt-Winters vs XGBoost, selected by backtest MAPE."),
-    ("04", "⚠️", "Churn Risk", "RFM + behavioral features, ROC-AUC leaderboard, top at-risk list."),
-    ("05", "🧪", "Experiment Readout", "Welch t-test primary metric with guardrails and verdict."),
+    (
+        "01",
+        "📊",
+        "Business Health",
+        "Revenue, AOV, conversion, and margin viewed period-over-period with channel and category mix.",
+        "pages/1_📊_Business_Health.py",
+    ),
+    (
+        "02",
+        "🔻",
+        "Funnel Drop-off",
+        "Five-stage funnel performance with segmented device-by-channel leakage and revenue-at-risk context.",
+        "pages/2_🔻_Funnel_Drop_Off.py",
+    ),
+    (
+        "03",
+        "📈",
+        "Demand Forecast",
+        "Seasonal-naive, Holt-Winters, and XGBoost forecasts with model selection based on backtest accuracy.",
+        "pages/3_📈_Demand_Forecast.py",
+    ),
+    (
+        "04",
+        "⚠️",
+        "Churn Risk",
+        "RFM and behavioral risk scoring with retention cohorts and an at-risk customer watchlist.",
+        "pages/4_⚠️_Churn_Risk.py",
+    ),
+    (
+        "05",
+        "🧪",
+        "Experiment Readout",
+        "Primary-metric lift, guardrails, and a decision-ready experiment summary.",
+        "pages/5_🧪_Experiment_Readout.py",
+    ),
 ]
-html = '<div class="pc-navgrid">'
-for n, icon, title, desc in nav_items:
-    html += (
-        f'<div class="pc-navcard">'
-        f'<div class="n">{n} · {icon}</div>'
-        f'<div class="t">{title}</div>'
-        f'<div class="d">{desc}</div>'
-        f'</div>'
-    )
-html += "</div>"
-st.markdown(html, unsafe_allow_html=True)
+for row_items in (nav_items[:3], nav_items[3:]):
+    cols = st.columns(len(row_items))
+    for col, (n, icon, title, desc, page_path) in zip(cols, row_items, strict=True):
+        with col:
+            st.markdown(
+                f"""
+                <div class="pc-navcard">
+                  <div class="n">{n} · {icon}</div>
+                  <div class="t">{title}</div>
+                  <div class="d">{desc}</div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+            st.page_link(page_path, label=f"Open {title}", icon=icon, use_container_width=True)
 
 st.markdown("<div style='height: 22px;'></div>", unsafe_allow_html=True)
-st.markdown(
-    f"""
-    <div style="display:flex; justify-content:space-between; font-size:0.78rem;
-                color:{COLORS['text_muted']}; padding-top:14px; border-top:1px solid {COLORS['border']};">
-      <div>PulseCommerce · synthetic dataset · {len(daily) if not daily.empty else 0} days of history</div>
-      <div>
-        <a href="https://github.com/kelvinasiedu-programmer/pulsecommerce" target="_blank"
-           style="color:{COLORS['text_muted']}; text-decoration:none;">GitHub</a>
-        &nbsp;·&nbsp; Methodology &nbsp;·&nbsp; KPI Dictionary
-      </div>
-    </div>
-    """,
-    unsafe_allow_html=True,
-)
+footer_left, footer_right = st.columns([5, 7])
+with footer_left:
+    st.caption(f"PulseCommerce · synthetic dataset · {len(daily) if not daily.empty else 0} days of history")
+with footer_right:
+    link_cols = st.columns(3)
+    link_cols[0].link_button(
+        "GitHub",
+        "https://github.com/kelvinasiedu-programmer/pulsecommerce",
+        use_container_width=True,
+    )
+    link_cols[1].link_button(
+        "Methodology",
+        "https://github.com/kelvinasiedu-programmer/pulsecommerce/blob/main/docs/methodology.md",
+        use_container_width=True,
+    )
+    link_cols[2].link_button(
+        "KPI Dictionary",
+        "https://github.com/kelvinasiedu-programmer/pulsecommerce/blob/main/docs/kpi_dictionary.md",
+        use_container_width=True,
+    )
