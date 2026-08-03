@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-03T17:57:28+00:00",
+  "generated_at": "2026-08-03T18:40:35+00:00",
   "coverage": {
     "start": "2024-01-03",
     "end": "2026-03-31"
@@ -21,7 +21,7 @@
         "avg_order_value",
         "conversion_rate"
       ],
-      "size_kb": 77.8
+      "size_kb": 74.6
     },
     {
       "name": "orders_fact",
