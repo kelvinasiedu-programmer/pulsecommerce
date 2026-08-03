@@ -11,8 +11,19 @@ Every chart in PulseCommerce traces back to a metric defined here. When two laye
 | **Orders** | Count of distinct `order_id` in `fct_orders`, excluding cancels/returns | `daily_kpis.orders` | Ops |
 | **Sessions** | Count of distinct `session_id` in `fct_sessions` | `daily_kpis.sessions` | Marketing |
 | **Average Order Value (AOV)** | Revenue ÷ Orders | Computed in Health layer | Commercial |
-| **Conversion Rate** | Sessions with a purchase event ÷ total sessions | `daily_kpis.conversion_rate` | Growth |
+| **Conversion Rate** | Sessions with a purchase event ÷ total sessions. **Gross** - counts the checkout, not whether it stuck | `daily_kpis.conversion_rate` | Growth |
 | **Cancel Rate** | Cancelled orders ÷ total orders (excluding cancels) | Computed in Health layer | Ops |
+
+### Why Orders ÷ Sessions does not equal Conversion Rate
+
+Conversion Rate is gross and Orders is net. Every order originates in a session
+that reached the purchase stage, but roughly 12% of those are later cancelled or
+returned and drop out of Orders, Revenue and Margin.
+
+So on the same dashboard you will see ~4.1% conversion against ~3.6% orders per
+session. Both are correct and they measure different things: growth is judged on
+checkouts completed, finance on orders that survived. If you need them to
+reconcile, the bridge is Cancel Rate.
 
 ## Funnel (Layer 2)
 

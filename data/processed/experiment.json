@@ -2,15 +2,15 @@
   "hypothesis": "Targeted 10% off promo lifts conversion on at-risk customers without hurting AOV or refund rate.",
   "start": "2026-01-30",
   "end": "2026-03-31",
-  "n_control": 2172,
-  "n_treatment": 2174,
+  "n_control": 1010,
+  "n_treatment": 1011,
   "primary": {
     "name": "conversion_rate",
-    "control_mean": 0.024861878453038673,
-    "treatment_mean": 0.02667893284268629,
-    "abs_lift": 0.0018170543896476182,
-    "rel_lift": 0.07308596545027086,
-    "p_value": 0.7055070862454378,
+    "control_mean": 0.026732673267326732,
+    "treatment_mean": 0.027695351137487636,
+    "abs_lift": 0.0009626778701609037,
+    "rel_lift": 0.03601128329120418,
+    "p_value": 0.8942632247725234,
     "is_significant": false,
     "is_guardrail": false,
     "direction_ok": true
@@ -18,38 +18,38 @@
   "guardrails": [
     {
       "name": "average_order_value",
-      "control_mean": 121.78398148148148,
-      "treatment_mean": 109.7774440909091,
-      "abs_lift": -12.006537390572376,
-      "rel_lift": -0.098588806545121,
-      "p_value": 0.3498491554711666,
+      "control_mean": 120.72037037037036,
+      "treatment_mean": 124.51789553571429,
+      "abs_lift": 3.7975251653439273,
+      "rel_lift": 0.031457202737972985,
+      "p_value": 0.8505651278278334,
       "is_significant": false,
       "is_guardrail": true,
-      "direction_ok": false
+      "direction_ok": true
     },
     {
       "name": "items_per_order",
       "control_mean": 2.8518518518518516,
-      "treatment_mean": 2.526363636363637,
-      "abs_lift": -0.3254882154882148,
-      "rel_lift": -0.11413223140495846,
-      "p_value": 0.1813330058985334,
+      "treatment_mean": 2.7234672619047617,
+      "abs_lift": -0.1283845899470899,
+      "rel_lift": -0.04501797309833023,
+      "p_value": 0.7289369082424384,
       "is_significant": false,
       "is_guardrail": true,
       "direction_ok": false
     },
     {
       "name": "refund_rate_proxy",
-      "control_mean": 0.3333333333333333,
-      "treatment_mean": 0.369090909090909,
-      "abs_lift": 0.03575757575757571,
-      "rel_lift": 0.10727272727272713,
-      "p_value": 0.6947697089198398,
+      "control_mean": 0.2962962962962963,
+      "treatment_mean": 0.39875,
+      "abs_lift": 0.10245370370370371,
+      "rel_lift": 0.34578125000000004,
+      "p_value": 0.43711091334652563,
       "is_significant": false,
       "is_guardrail": true,
       "direction_ok": false
     }
   ],
   "recommendation": "iterate",
-  "rationale": "Directional lift of +7.31% on conversion_rate but not statistically significant (p=0.706). Extend test or increase sample."
+  "rationale": "Directional lift of +3.60% on conversion_rate but not statistically significant (p=0.894). Extend test or increase sample."
 }

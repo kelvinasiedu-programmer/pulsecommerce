@@ -23,7 +23,7 @@ def repo_tmp_dir() -> Path:
 def tiny_dataset(repo_tmp_dir: Path) -> Path:
     out = repo_tmp_dir / f"raw-{uuid4().hex}"
     out.mkdir(parents=True, exist_ok=True)
-    cfg = SmallDataGenConfig(n_users=600, n_products=40, n_orders=1_500, n_events_per_user_mean=6.0)
+    cfg = SmallDataGenConfig(n_users=600, n_products=40, n_orders=1_500)
     dataset = generate(cfg=cfg, seed=7)
     dataset.write_parquet(out)
     return out

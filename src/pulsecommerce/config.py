@@ -43,8 +43,12 @@ class DataGenConfig:
 
     n_users: int = 25_000
     n_products: int = 800
-    n_orders: int = 95_000
-    n_events_per_user_mean: float = 18.0
+    #: Target order count, not an exact one. Orders are emitted by sessions that
+    #: reach the purchase stage, so the generator back-solves how many sessions
+    #: it needs from the funnel's mix-weighted conversion rate (~3%). Raising
+    #: this raises session and event volume roughly 32x, so it drives dataset
+    #: size more than any other setting.
+    n_orders: int = 25_000
     start_date: str = "2024-01-01"
     end_date: str = "2026-03-31"
     # Repeat-buyer skew (Zipf-Mandelbrot): weight ~ 1 / (rank + offset) ** exponent,
@@ -82,8 +86,7 @@ class SmallDataGenConfig(DataGenConfig):
 
     n_users: int = 2_500
     n_products: int = 120
-    n_orders: int = 8_000
-    n_events_per_user_mean: float = 10.0
+    n_orders: int = 1_500
 
 
 @dataclass(frozen=True)

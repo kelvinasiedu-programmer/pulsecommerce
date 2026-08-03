@@ -1,14 +1,14 @@
 {
-  "generated_at": "2026-08-02T05:47:50+00:00",
+  "generated_at": "2026-08-03T17:57:28+00:00",
   "coverage": {
-    "start": "2024-01-01",
-    "end": "2026-03-30"
+    "start": "2024-01-03",
+    "end": "2026-03-31"
   },
   "tables": [
     {
       "name": "kpi_daily",
       "file": "kpi_daily.csv",
-      "rows": 820,
+      "rows": 819,
       "columns": [
         "metric_date",
         "sessions",
@@ -21,12 +21,12 @@
         "avg_order_value",
         "conversion_rate"
       ],
-      "size_kb": 84.2
+      "size_kb": 77.8
     },
     {
       "name": "orders_fact",
       "file": "orders_fact.csv",
-      "rows": 256960,
+      "rows": 67443,
       "columns": [
         "order_id",
         "user_id",
@@ -44,12 +44,12 @@
         "margin",
         "discount_pct"
       ],
-      "size_kb": 28622.2
+      "size_kb": 7531.0
     },
     {
       "name": "funnel_stages",
       "file": "funnel_stages.csv",
-      "rows": 12390,
+      "rows": 12315,
       "columns": [
         "week_start",
         "device",
@@ -58,7 +58,7 @@
         "stage",
         "sessions_reached"
       ],
-      "size_kb": 578.4
+      "size_kb": 578.1
     },
     {
       "name": "funnel_segments",
@@ -78,7 +78,7 @@
         "purchase_rate",
         "overall_conversion"
       ],
-      "size_kb": 3.1
+      "size_kb": 3.2
     },
     {
       "name": "cohort_retention",
@@ -91,7 +91,7 @@
         "cohort_size",
         "retention_rate"
       ],
-      "size_kb": 15.2
+      "size_kb": 14.6
     }
   ]
 }
