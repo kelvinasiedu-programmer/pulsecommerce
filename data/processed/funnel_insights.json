@@ -1,17 +1,17 @@
 {
   "biggest_drop_stage": "purchase",
-  "biggest_drop_rate": 0.638700947225981,
+  "biggest_drop_rate": 0.6389537397319498,
   "worst_segment": {
     "device": "mobile",
     "channel": "Display",
-    "overall_conversion": 0.0049856473787581205,
-    "sessions": 6619
+    "overall_conversion": 0.004871962450240627,
+    "sessions": 16831
   },
   "best_segment": {
     "device": "desktop",
     "channel": "Email",
-    "overall_conversion": 0.13120671154033753,
-    "sessions": 10251
+    "overall_conversion": 0.13312393361253297,
+    "sessions": 25788
   },
-  "estimated_lost_revenue": 101344.41898710922
+  "estimated_lost_revenue": 264924.0489190042
 }

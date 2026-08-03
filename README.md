@@ -106,12 +106,22 @@ with dbt in a real setup.
 The public `thelook_ecommerce` table on BigQuery needs GCP auth, so I wrote a
 deterministic generator that matches its schema:
 
-- ~25k users, 800 products, 95k orders, ~450k clickstream events
-- Weekly and annual seasonality (sine waves plus a Q4 holiday boost)
+- ~25k users, 800 products, ~617k sessions, ~1.18M clickstream events, ~22k orders
+- The clickstream is the source of truth. Sessions walk the funnel and every
+  session reaching the purchase stage emits exactly one order, so "4.1%
+  conversion" and "22k orders" are the same statement rather than two unrelated
+  ones
+- Weekly and annual seasonality (sine waves plus a Q4 holiday boost), applied to
+  sessions so it flows through to orders
 - Segment-dependent funnel friction (device × channel conversion asymmetry)
-- Zipf-sampled repeat-buyer skew
-- Cohort retention decay so the churn model has something to learn
+- Zipf-Mandelbrot per-user propensity, which drives the repeat-buyer skew
+- Sessions are confined to a user's lifetime, so cohort retention is not
+  measuring purchases that happened before the account existed
 - Reproducible via `--seed`
+
+`n_orders` in `DataGenConfig` is a target rather than an exact count: the
+generator back-solves session volume from the funnel's mix-weighted conversion
+rate, and about 12% of purchases are later cancelled or returned.
 
 ## Repo layout
 
