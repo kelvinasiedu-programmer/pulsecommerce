@@ -8,7 +8,7 @@ from pathlib import Path
 import pandas as pd
 import pytest
 
-from pulsecommerce.exports.tableau import CANCELLED_RETURNED, NET_SALE, export_tableau
+from pulsecommerce.exports.tableau import export_tableau
 
 
 @pytest.fixture(scope="module")
@@ -50,15 +50,26 @@ def test_writes_every_expected_table(bundle):
         assert path.exists(), f"{path.name} was not written"
 
 
-def test_orders_fact_tags_cancellations_without_dropping_them(bundle):
+def test_orders_fact_excludes_cancellations(bundle):
     df = pd.read_csv(bundle["orders_fact"])
 
-    assert set(df["status_group"]) <= {NET_SALE, CANCELLED_RETURNED}
-    assert (df["status_group"] == CANCELLED_RETURNED).any(), "nothing left to filter in Tableau"
-    assert (df["status_group"] == NET_SALE).any()
+    assert not df["status"].isin({"Cancelled", "Returned"}).any()
+    assert "status_group" not in df.columns, "the tagging column is no longer exported"
 
-    cancelled = df.loc[df["status_group"] == CANCELLED_RETURNED, "status"]
-    assert set(cancelled) <= {"Cancelled", "Returned"}
+
+def test_orders_fact_revenue_agrees_with_kpi_daily(bundle):
+    """The two sources a Tableau dashboard shows side by side must not disagree.
+
+    Business Health puts KPI tiles from `kpi_daily` next to channel and category
+    breakdowns from `orders_fact`. If these totals drift, the dashboard
+    contradicts itself on screen.
+    """
+    orders = pd.read_csv(bundle["orders_fact"])
+    daily = pd.read_csv(bundle["kpi_daily"])
+
+    assert orders["revenue"].sum() == pytest.approx(daily["revenue"].sum(), rel=1e-6)
+    assert orders["margin"].sum() == pytest.approx(daily["margin"].sum(), rel=1e-6)
+    assert orders["order_id"].nunique() == daily["orders"].sum()
 
 
 def test_funnel_stages_is_long_and_ordered(bundle):
