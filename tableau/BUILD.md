@@ -37,11 +37,16 @@ the Data Source tab, add a second connection to `orders_fact.csv` (Add > Text
 File). Leave them as separate data sources - do not join them. They are at
 different grains and joining them will double-count revenue.
 
-**Data source filter (do this first).** On the `orders_fact` data source, top
-right > Filters > Add > `Status Group` > select `net_sale` only. This is what
-makes Tableau agree with `docs/kpi_dictionary.md`, which excludes cancelled and
-returned orders from revenue, margin and order counts. Skip it and every number
-on the dashboard will be about 12% too high.
+**No data source filter needed.** `orders_fact.csv` already excludes cancelled
+and returned rows, so it agrees with `kpi_daily.csv` and with
+`docs/kpi_dictionary.md` out of the box. An earlier version of this guide had
+you add a `Status Group` data source filter in Tableau; that step is gone
+because Tableau Public Desktop failed with an internal error applying it, and
+because doing the exclusion in SQL is verified by a test instead of by you
+remembering to click something.
+
+Sanity check before building: drop `Revenue` on an empty sheet. It should read
+**$2,699,426**, matching `kpi_daily` exactly.
 
 **Calculations** on `kpi_daily`:
 

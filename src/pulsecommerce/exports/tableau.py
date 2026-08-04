@@ -9,9 +9,12 @@ decided. The one exception is `cohort_retention`, which is already at its
 natural grain coming out of the churn layer.
 
 Metric definitions match `docs/kpi_dictionary.md`: revenue, margin and order
-counts exclude Cancelled/Returned rows. `orders_fact` keeps those rows and
-tags them via `status_group` so cancellations stay analysable; the Tableau
-data source filter documented in `tableau/BUILD.md` restores the exclusion.
+counts exclude Cancelled/Returned rows, and `orders_fact` applies that
+exclusion in SQL rather than leaving it to a Tableau data source filter. The
+filter approach was tried first and Tableau Public Desktop failed with an
+internal error twice while applying it. Doing it here also makes `orders_fact`
+and `kpi_daily` agree on revenue by construction, which a test asserts.
+Cancellation volume is still available as `cancelled_orders` on `kpi_daily`.
 
 Usage:
     python -m pulsecommerce.cli tableau
@@ -31,9 +34,6 @@ from pulsecommerce.logging_utils import get_logger
 from pulsecommerce.warehouse import Warehouse
 
 logger = get_logger(__name__)
-
-NET_SALE = "net_sale"
-CANCELLED_RETURNED = "cancelled_returned"
 
 #: Funnel stages in order, mapped to their flag column on `fct_sessions`.
 FUNNEL_STAGES: tuple[tuple[int, str, str], ...] = (
@@ -60,7 +60,7 @@ FROM daily_kpis
 ORDER BY metric_date
 """
 
-ORDERS_FACT_SQL = f"""
+ORDERS_FACT_SQL = """
 SELECT
     oi.order_id,
     oi.user_id,
@@ -72,10 +72,6 @@ SELECT
     oi.category,
     p.brand,
     oi.status,
-    CASE
-        WHEN oi.status IN ('Cancelled', 'Returned') THEN '{CANCELLED_RETURNED}'
-        ELSE '{NET_SALE}'
-    END                AS status_group,
     oi.sale_price      AS revenue,
     oi.cost            AS cost,
     oi.gross_margin    AS margin,
@@ -85,6 +81,7 @@ JOIN stg_orders o          ON o.order_id = oi.order_id
 LEFT JOIN stg_users u      ON u.user_id = oi.user_id
 LEFT JOIN dim_customers c  ON c.user_id = oi.user_id
 LEFT JOIN dim_products p   ON p.product_id = oi.product_id
+WHERE oi.status NOT IN ('Cancelled', 'Returned')
 ORDER BY o.order_date, oi.order_id
 """
 
