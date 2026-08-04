@@ -68,7 +68,7 @@ class PromotionExperiment:
         self.guardrail_drift = guardrail_drift
 
     def _bootstrap_user_panel(self, window_days: int = 60) -> pd.DataFrame:
-        """Collect a per-user, per-experiment-window behavioural snapshot."""
+        """Collect a per-user, per-experiment-window behavioral snapshot."""
         df = self.wh.query(
             """
             WITH bounds AS (
@@ -191,7 +191,7 @@ class PromotionExperiment:
 
 
 def _assign_arms_balanced(strata: np.ndarray, rng: np.random.Generator) -> np.ndarray:
-    """Split each stratum evenly between arms, randomising within the stratum.
+    """Split each stratum evenly between arms, randomizing within the stratum.
 
     Plain coin-flip assignment lets the arms start at different conversion rates.
     On a high-churn audience that is only ~57 converters per arm, so the starting
@@ -283,5 +283,5 @@ def _decide(primary: MetricResult, guardrails: list[MetricResult]) -> tuple[str,
         )
     return (
         "reject",
-        f"No meaningful lift detected (Δ={primary.rel_lift:+.2%}, p={primary.p_value:.3f}).",
+        f"No meaningful lift detected (Î”={primary.rel_lift:+.2%}, p={primary.p_value:.3f}).",
     )

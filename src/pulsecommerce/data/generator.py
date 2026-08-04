@@ -12,7 +12,7 @@ funnel, and every session that reaches the purchase stage emits exactly one
 order. That is what makes "241,035 sessions at 3.1% conversion" and "25,000
 orders" the same statement instead of two unrelated ones.
 
-The generator injects realistic behaviours that power every downstream layer:
+The generator injects realistic behaviors that power every downstream layer:
   * seasonality (weekly + annual), applied to sessions so it flows into orders
   * device x channel conversion asymmetry (funnel friction)
   * per-user propensity, which produces the repeat-buyer skew
