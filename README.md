@@ -1,6 +1,6 @@
----
+﻿---
 title: PulseCommerce
-emoji: 📈
+emoji: ðŸ“ˆ
 colorFrom: indigo
 colorTo: purple
 sdk: docker
@@ -98,7 +98,7 @@ flowchart LR
     K --> L[Static site]
 ```
 
-SQL is split into `staging → marts → metrics`, which is the layout I'd use
+SQL is split into `staging â†’ marts â†’ metrics`, which is the layout I'd use
 with dbt in a real setup.
 
 ## Dataset
@@ -113,7 +113,7 @@ deterministic generator that matches its schema:
   ones
 - Weekly and annual seasonality (sine waves plus a Q4 holiday boost), applied to
   sessions so it flows through to orders
-- Segment-dependent funnel friction (device × channel conversion asymmetry)
+- Segment-dependent funnel friction (device Ã— channel conversion asymmetry)
 - Zipf-Mandelbrot per-user propensity, which drives the repeat-buyer skew
 - Sessions are confined to a user's lifetime, so cohort retention is not
   measuring purchases that happened before the account existed
@@ -127,32 +127,32 @@ rate, and about 12% of purchases are later cancelled or returned.
 
 ```
 pulsecommerce/
-├── src/pulsecommerce/
-│   ├── warehouse.py            # DuckDB adapter
-│   ├── pipeline.py             # orchestrates the 5 layers
-│   ├── cli.py                  # generate|warehouse|pipeline|all|tableau
-│   ├── data/generator.py       # synthetic dataset
-│   ├── exports/tableau.py      # flattens the warehouse to CSV for Tableau
-│   └── analytics/
-│       ├── health.py
-│       ├── funnel.py
-│       ├── forecast.py         # Seasonal-naive, Holt-Winters, XGBoost
-│       ├── churn.py            # Logistic + XGBoost, RFM features
-│       └── experiment.py       # Welch t-test + guardrails
-├── sql/                        # staging / marts / metrics
-├── dashboard/                  # Streamlit multi-page app
-├── site/                       # static site embedding the Tableau workbooks
-├── tableau/BUILD.md            # how the workbooks are built
-├── tests/
-├── docs/
-└── .github/workflows/ci.yml
+â”œâ”€â”€ src/pulsecommerce/
+â”‚   â”œâ”€â”€ warehouse.py            # DuckDB adapter
+â”‚   â”œâ”€â”€ pipeline.py             # orchestrates the 5 layers
+â”‚   â”œâ”€â”€ cli.py                  # generate|warehouse|pipeline|all|tableau
+â”‚   â”œâ”€â”€ data/generator.py       # synthetic dataset
+â”‚   â”œâ”€â”€ exports/tableau.py      # flattens the warehouse to CSV for Tableau
+â”‚   â””â”€â”€ analytics/
+â”‚       â”œâ”€â”€ health.py
+â”‚       â”œâ”€â”€ funnel.py
+â”‚       â”œâ”€â”€ forecast.py         # Seasonal-naive, Holt-Winters, XGBoost
+â”‚       â”œâ”€â”€ churn.py            # Logistic + XGBoost, RFM features
+â”‚       â””â”€â”€ experiment.py       # Welch t-test + guardrails
+â”œâ”€â”€ sql/                        # staging / marts / metrics
+â”œâ”€â”€ dashboard/                  # Streamlit multi-page app
+â”œâ”€â”€ site/                       # static site embedding the Tableau workbooks
+â”œâ”€â”€ tableau/BUILD.md            # how the workbooks are built
+â”œâ”€â”€ tests/
+â”œâ”€â”€ docs/
+â””â”€â”€ .github/workflows/ci.yml
 ```
 
 ## Stack
 
 DuckDB for the warehouse (zero-config, SQL-native, bundles into the wheel),
 layered SQL transformations, scikit-learn + XGBoost + statsmodels for
-modelling, Streamlit + Plotly for the Python app, Tableau Public for the
+modeling, Streamlit + Plotly for the Python app, Tableau Public for the
 published dashboards, pytest / ruff / mypy, and GitHub Actions for CI across
 Python 3.10-3.12. Docker for reproducible deploy.
 
@@ -170,7 +170,7 @@ one pass.
 ## Docs
 
 - [`docs/kpi_dictionary.md`](docs/kpi_dictionary.md) - metric definitions
-- [`docs/methodology.md`](docs/methodology.md) - modelling choices, backtest protocol, guardrail philosophy
+- [`docs/methodology.md`](docs/methodology.md) - modeling choices, backtest protocol, guardrail philosophy
 - [`docs/executive_memo.md`](docs/executive_memo.md) - one-page stakeholder readout
 - [`docs/DEPLOY.md`](docs/DEPLOY.md) - deployment notes
 
@@ -185,4 +185,4 @@ one pass.
 
 ## License
 
-MIT © Kelvin Asiedu
+MIT Â© Kelvin Asiedu

@@ -1,4 +1,4 @@
-# Methodology
+﻿# Methodology
 
 ## Data
 
@@ -30,7 +30,7 @@ Every Python layer reads from `metrics/` or `marts/` only - never from raw table
 - **Minimum history**: 26 weeks required; categories below that are skipped
 - **Models**:
   - *Seasonal-naive*: last-year-same-week (baseline)
-  - *Holt-Winters*: additive trend + additive seasonality (period=52) when history ≥ 104 weeks
+  - *Holt-Winters*: additive trend + additive seasonality (period=52) when history â‰¥ 104 weeks
   - *XGBoost*: lag features (1, 2, 4, 8, 13, 26, 52), rolling stats, and calendar features
 - **Backtest**: 3-fold walk-forward, fold size = forecast horizon (12 weeks)
 - **Selection**: lowest average MAPE across folds
@@ -39,8 +39,8 @@ Every Python layer reads from `metrics/` or `marts/` only - never from raw table
 
 ## Churn (Layer 4)
 
-- **Label**: `recency_days ≥ inactivity_days (90)` at the snapshot date (= latest order date)
-- **Leakage control**: features are computed only on data ≤ `snapshot − 90 days`; customers whose `last_order_date` is inside the window are filtered out
+- **Label**: `recency_days â‰¥ inactivity_days (90)` at the snapshot date (= latest order date)
+- **Leakage control**: features are computed only on data â‰¤ `snapshot âˆ’ 90 days`; customers whose `last_order_date` is inside the window are filtered out
 - **Features**: age, tenure, recency, frequency, monetary, AOV, distinct categories, cancel rate, days-between-orders, country, traffic source
 - **Models**:
   - *XGBoost* (primary) for signal
@@ -53,7 +53,7 @@ Every Python layer reads from `metrics/` or `marts/` only - never from raw table
 - **Audience**: top-30% risk deciles from Layer 4 (minimum 500 users)
 - **Assignment**: 50/50 random with a seed
 - **Effect simulation**: treatment receives +8 pp absolute conversion boost and a small negative drift on guardrails - so the readout is realistic, not trivial
-- **Tests**: Welch's two-sample t-test for every metric at α = 0.05
+- **Tests**: Welch's two-sample t-test for every metric at Î± = 0.05
 - **Decision rules** (see `kpi_dictionary.md`):
   - `ship` requires significant positive lift **and** no significant guardrail regression
   - `reject` on any significant guardrail regression
@@ -64,4 +64,4 @@ Every Python layer reads from `metrics/` or `marts/` only - never from raw table
 - Synthetic data - the absolute numbers are illustrative; the *method* is what's real
 - Forecast intervals use a simple residual-std heuristic (replace with conformal prediction for production)
 - Churn label definition is single-threshold; a multi-window or survival model would be stronger in production
-- Experiment uses observational proxies (last 60 days) rather than a true concurrent randomisation - real Ship/No-Ship decisions require live randomised exposure
+- Experiment uses observational proxies (last 60 days) rather than a true concurrent randomization - real Ship/No-Ship decisions require live randomized exposure
