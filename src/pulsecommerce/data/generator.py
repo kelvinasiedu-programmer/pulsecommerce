@@ -74,9 +74,16 @@ MAX_PROPENSITY = 12.0
 
 
 def _seasonality_multiplier(date: pd.Timestamp) -> float:
-    """Yearly + weekly pattern. Peaks in Nov/Dec and on weekends."""
+    """Yearly + weekly pattern. Peaks in Nov/Dec and on weekends.
+
+    The annual wave is phased to crest around day 330 (late November) so the
+    holiday boost lands on a rising curve rather than fighting it. The offset
+    used to be 80, which put the crest on 20 June and the trough in December -
+    the docstring and the README both claimed a Q4 peak that the data did not
+    have, and the summer bump was the real seasonal signal the forecaster found.
+    """
     day_of_year = date.dayofyear
-    annual = 1.0 + 0.35 * math.sin(2 * math.pi * (day_of_year - 80) / 365)
+    annual = 1.0 + 0.35 * math.sin(2 * math.pi * (day_of_year - 239) / 365)
     holiday_boost = 1.0
     if date.month == 11 and date.day >= 20:
         holiday_boost = 1.6
@@ -218,6 +225,46 @@ def _user_propensity(n_users: int, cfg: DataGenConfig, rng: np.random.Generator)
     return np.clip(weights / weights.mean(), MIN_PROPENSITY, MAX_PROPENSITY)
 
 
+def _sample_session_days(
+    created_day: np.ndarray,
+    seasonal: np.ndarray,
+    total_days: int,
+    decay_days: float,
+    rng: np.random.Generator,
+) -> np.ndarray:
+    """Pick a day for each session from seasonality times tenure decay.
+
+    Two forces have to combine here. Seasonality is a function of the absolute
+    date, so Q4 shows up in the forecast. Decay is a function of how long the
+    user has had an account, so activity thins with tenure and the cohort
+    triangle falls away instead of climbing. They cannot be factored apart,
+    because decay is measured from each user's own signup day.
+
+    Sessions are grouped by signup day - at most one group per day in the
+    period, so a few hundred - and each group draws against its own weight
+    vector by inverse CDF. Exact, and still vectorised within a group.
+    """
+    session_day = np.empty(len(created_day), dtype=np.int64)
+    if len(created_day) == 0:
+        return session_day
+
+    order = np.argsort(created_day, kind="stable")
+    sorted_created = created_day[order]
+    starts = np.flatnonzero(np.r_[True, sorted_created[1:] != sorted_created[:-1]])
+    ends = np.r_[starts[1:], len(sorted_created)]
+
+    for start, end in zip(starts, ends, strict=True):
+        day = int(sorted_created[start])
+        span = total_days - day
+        weights = seasonal[day:] * np.exp(-np.arange(span) / decay_days)
+        cdf = np.cumsum(weights)
+        cdf /= cdf[-1]
+        picks = np.searchsorted(cdf, rng.random(end - start), side="left")
+        session_day[order[start:end]] = day + np.minimum(picks, span - 1)
+
+    return session_day
+
+
 def _generate_sessions(
     cfg: DataGenConfig,
     users: pd.DataFrame,
@@ -225,11 +272,11 @@ def _generate_sessions(
 ) -> pd.DataFrame:
     """One row per session: who, where from, when, and how far down the funnel.
 
-    Session counts scale with both user propensity and the share of the period
-    the user existed for, so someone who signed up last month is not credited
-    with two years of browsing. Session dates are drawn from the seasonal
-    distribution restricted to each user's own lifetime, which is what keeps
-    cohort retention meaningful and puts the seasonal shape into orders.
+    Session counts scale with user propensity and with how much of their decay
+    curve fits inside the period, so someone who signed up last month is not
+    credited with two years of browsing. Session dates come from seasonality
+    times tenure decay, which puts the seasonal shape into orders and makes the
+    cohort triangle fall away with age.
     """
     start = pd.Timestamp(cfg.start_date)
     end = pd.Timestamp(cfg.end_date)
@@ -237,12 +284,16 @@ def _generate_sessions(
     total_days = len(day_index)
 
     seasonal = np.array([_seasonality_multiplier(d) for d in day_index])
-    daily_probs = seasonal / seasonal.sum()
-    daily_cdf = np.cumsum(daily_probs)
 
     propensity = _user_propensity(len(users), cfg, rng)
     created_day = users["created_day"].to_numpy()
-    active_frac = 1.0 - created_day / total_days
+
+    # Expected sessions scale with the integral of the decay over the window the
+    # user actually had. A linear share-of-period weight would hand a long-tenured
+    # user two years' worth of sessions and then, because of decay, cram them all
+    # into their first few months.
+    tau = cfg.session_decay_days
+    active_frac = tau * (1.0 - np.exp(-(total_days - created_day) / tau))
 
     target_sessions = cfg.n_orders / _expected_session_conversion(cfg)
     weight = propensity * active_frac
@@ -256,12 +307,8 @@ def _generate_sessions(
     devices = rng.choice(cfg.devices, size=n_sessions, p=list(cfg.device_weights))
     channels = rng.choice(cfg.channels, size=n_sessions, p=_normalize(list(CHANNEL_MIX)))
 
-    # Inverse-CDF sample of the seasonal day distribution, truncated to the
-    # window that starts on the user's signup day.
-    floor = np.where(session_created_day > 0, daily_cdf[session_created_day - 1], 0.0)
-    draw = floor + rng.random(n_sessions) * (1.0 - floor)
-    session_day = np.clip(
-        np.searchsorted(daily_cdf, draw, side="left"), session_created_day, total_days - 1
+    session_day = _sample_session_days(
+        session_created_day, seasonal, total_days, cfg.session_decay_days, rng
     )
     session_second = rng.integers(0, 86_400, size=n_sessions)
 

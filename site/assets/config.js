@@ -27,7 +27,7 @@ export const DASHBOARDS = [
       "Revenue, margin, AOV and conversion against the prior period, with channel " +
       "and category mix underneath. Cancelled and returned orders are filtered out " +
       "at the data source, so every number matches the KPI dictionary.",
-    src: "https://public.tableau.com/views/PulseCommerce-BusinessHealth/BusinessHealth",
+    src: "https://public.tableau.com/views/PulseCommerce-Business-Health/BusinessHealth",
     height: 920,
   },
   {
@@ -38,7 +38,7 @@ export const DASHBOARDS = [
       "A five-stage session funnel from first visit to purchase, split by device " +
       "and channel. The heatmap ranks 21 device-channel segments by end-to-end " +
       "conversion so the worst performers surface without hunting.",
-    src: null,
+    src: "https://public.tableau.com/views/PulseCommerce-FunnelDrop-Off/FunnelDrop-Off",
     height: 900,
   },
   {

@@ -51,6 +51,11 @@ class DataGenConfig:
     n_orders: int = 25_000
     start_date: str = "2024-01-01"
     end_date: str = "2026-03-31"
+    #: Mean of the exponential that thins a user's session rate as their account
+    #: ages. Without it, sessions spread evenly across a user's whole lifetime,
+    #: every buyer stays equally likely to return forever, and the cohort
+    #: triangle shows retention climbing with age instead of decaying.
+    session_decay_days: float = 150.0
     # Repeat-buyer skew (Zipf-Mandelbrot): weight ~ 1 / (rank + offset) ** exponent,
     # where offset = n_users * buyer_rank_offset_frac so the shape holds at any
     # dataset size. Tuned so ~64% of users ever order, the top 20% of buyers drive
