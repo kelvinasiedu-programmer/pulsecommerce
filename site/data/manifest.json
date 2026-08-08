@@ -1,14 +1,14 @@
 {
-  "generated_at": "2026-08-04T04:53:28+00:00",
+  "generated_at": "2026-08-08T04:18:41+00:00",
   "coverage": {
-    "start": "2024-01-03",
+    "start": "2024-01-01",
     "end": "2026-03-31"
   },
   "tables": [
     {
       "name": "kpi_daily",
       "file": "kpi_daily.csv",
-      "rows": 819,
+      "rows": 821,
       "columns": [
         "metric_date",
         "sessions",
@@ -21,12 +21,12 @@
         "avg_order_value",
         "conversion_rate"
       ],
-      "size_kb": 74.6
+      "size_kb": 75.7
     },
     {
       "name": "orders_fact",
       "file": "orders_fact.csv",
-      "rows": 59224,
+      "rows": 59458,
       "columns": [
         "order_id",
         "user_id",
@@ -43,12 +43,12 @@
         "margin",
         "discount_pct"
       ],
-      "size_kb": 6016.8
+      "size_kb": 6011.3
     },
     {
       "name": "funnel_stages",
       "file": "funnel_stages.csv",
-      "rows": 12315,
+      "rows": 12375,
       "columns": [
         "week_start",
         "device",
@@ -57,7 +57,7 @@
         "stage",
         "sessions_reached"
       ],
-      "size_kb": 578.1
+      "size_kb": 581.4
     },
     {
       "name": "funnel_segments",
@@ -82,7 +82,7 @@
     {
       "name": "cohort_retention",
       "file": "cohort_retention.csv",
-      "rows": 378,
+      "rows": 373,
       "columns": [
         "cohort_month",
         "month_number",

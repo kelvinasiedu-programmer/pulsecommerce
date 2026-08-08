@@ -53,15 +53,52 @@ def test_no_session_predates_the_user_signup():
 
 
 def test_orders_carry_seasonality():
-    """Q4 has to be visibly busier or the forecasting layer has nothing to find."""
+    """Q4 has to be visibly busier or the forecasting layer has nothing to find.
+
+    Measured as a classic seasonal index - each month against a centred 12-month
+    rolling mean - rather than by averaging raw calendar months. The customer
+    base grows across the period, and a raw comparison lets that trend cancel
+    the seasonal peak out: Nov/Dec 2024 land in the ramp-up and Nov/Dec 2025 in
+    the decline.
+    """
     cfg = SmallDataGenConfig(n_users=4_000, n_products=40, n_orders=8_000)
     ds = generate(cfg=cfg, seed=13)
 
-    by_month = ds.orders.groupby(pd.to_datetime(ds.orders["created_at"]).dt.month).size()
-    q4 = by_month.reindex([11, 12]).mean()
-    rest = by_month.drop([11, 12], errors="ignore").mean()
+    monthly = ds.orders.groupby(pd.to_datetime(ds.orders["created_at"]).dt.to_period("M")).size()
+    trend = monthly.rolling(12, center=True, min_periods=6).mean()
+    seasonal_index = (monthly / trend).dropna()
 
-    assert q4 > rest * 1.15, f"Q4 {q4:.0f} vs baseline {rest:.0f} is not a seasonal peak"
+    peak = seasonal_index[seasonal_index.index.month.isin([11, 12])].mean()
+
+    assert peak > 1.15, f"Q4 seasonal index {peak:.2f} is not a peak above trend"
+
+
+def test_repeat_purchase_rate_decays_with_tenure():
+    """Cohort retention has to fall as accounts age.
+
+    Sessions used to be spread evenly across a user's whole lifetime, so every
+    buyer stayed equally likely to return forever. Average retention read 14.4%
+    at month 1 and 19.3% at month 24 - a cohort triangle that climbs, which is
+    the most obviously wrong chart you can put in front of an analyst.
+    """
+    cfg = SmallDataGenConfig(n_users=4_000, n_products=40, n_orders=6_000)
+    ds = generate(cfg=cfg, seed=21)
+
+    orders = ds.orders[["user_id", "created_at"]].copy()
+    cohort = orders.groupby("user_id")["created_at"].min().dt.to_period("M")
+    orders["cohort"] = orders["user_id"].map(cohort)
+    orders["month_number"] = (orders["created_at"].dt.to_period("M") - orders["cohort"]).apply(
+        lambda offset: offset.n
+    )
+
+    size = orders.groupby("cohort")["user_id"].nunique()
+    active = orders.groupby(["cohort", "month_number"])["user_id"].nunique()
+    retention = (active / size).reset_index(name="rate")
+
+    curve = retention[retention["month_number"].between(1, 6)].groupby("month_number")["rate"]
+    early, late = curve.mean().loc[1], curve.mean().loc[6]
+
+    assert early > late, f"retention rose from {early:.1%} at month 1 to {late:.1%} at month 6"
 
 
 def test_orders_spread_across_the_user_base():
