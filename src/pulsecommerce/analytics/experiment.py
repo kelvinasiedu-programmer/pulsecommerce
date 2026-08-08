@@ -283,5 +283,5 @@ def _decide(primary: MetricResult, guardrails: list[MetricResult]) -> tuple[str,
         )
     return (
         "reject",
-        f"No meaningful lift detected (Î”={primary.rel_lift:+.2%}, p={primary.p_value:.3f}).",
+        f"No meaningful lift detected (Δ={primary.rel_lift:+.2%}, p={primary.p_value:.3f}).",
     )
