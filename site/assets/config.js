@@ -50,7 +50,7 @@ export const DASHBOARDS = [
       "triangle reads down for cohort quality and across for decay, which is the " +
       "fastest way to see whether retention is improving or the cohorts just got " +
       "bigger.",
-    src: "https://public.tableau.com/views/PulseCommerce-CohortRetention/CohortRetention",
-    height: 1170,
+    src: null,
+    height: 820,
   },
 ];
