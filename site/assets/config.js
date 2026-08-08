@@ -27,7 +27,7 @@ export const DASHBOARDS = [
       "Revenue, margin, AOV and conversion against the prior period, with channel " +
       "and category mix underneath. Cancelled and returned orders are filtered out " +
       "at the data source, so every number matches the KPI dictionary.",
-    src: "https://public.tableau.com/views/PulseCommerce-Business-Health_17861642426840/BusinessHealth",
+    src: "https://public.tableau.com/views/PulseCommerce-Business-Health/BusinessHealth",
     height: 920,
   },
   {
