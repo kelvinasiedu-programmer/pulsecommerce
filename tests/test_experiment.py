@@ -91,6 +91,32 @@ def test_decide_ships_on_clean_primary_win():
     assert rec == "ship"
 
 
+def test_decide_ignores_a_significant_but_trivial_guardrail_move():
+    """Statistical significance alone must not block a ship.
+
+    Three guardrails at alpha=0.05, rejecting on any one, throws a false block
+    roughly 14% of the time. A docs-only rebuild once flipped the published
+    verdict from iterate to reject on a 2% wobble in refund rate measured over
+    ~75 buyers per arm.
+    """
+    primary = _metric("conv", 0.10, 0.12, p=0.01, guardrail=False, lower_is_better=False)
+    guardrails = [
+        _metric("aov", 50.0, 49.0, p=0.001, guardrail=True, lower_is_better=False),
+    ]
+    rec, _ = _decide(primary, guardrails)
+    assert rec == "ship", "a 2% move should not veto a significant primary win"
+
+
+def test_decide_still_blocks_on_a_material_guardrail_regression():
+    primary = _metric("conv", 0.10, 0.12, p=0.01, guardrail=False, lower_is_better=False)
+    guardrails = [
+        _metric("aov", 50.0, 40.0, p=0.001, guardrail=True, lower_is_better=False),
+    ]
+    rec, why = _decide(primary, guardrails)
+    assert rec == "reject"
+    assert "aov" in why
+
+
 def test_decide_iterates_on_directional_but_insignificant_primary():
     primary = _metric("conv", 0.10, 0.105, p=0.3, guardrail=False, lower_is_better=False)
     rec, _ = _decide(primary, guardrails=[])

@@ -120,6 +120,12 @@ class ExperimentConfig:
     #: signs who still buy, which is who a retention team can actually move.
     audience_risk_floor: float = 0.50
     audience_risk_ceiling: float = 0.80
+    #: Minimum relative regression before a guardrail can block a ship. Three
+    #: guardrails each tested at alpha=0.05, rejecting on any one, gives a ~14%
+    #: chance of a false block per run - and refund_rate_proxy is a proportion
+    #: over ~75 buyers per arm, so it trips on noise. Requiring practical as well
+    #: as statistical significance is what an experimentation team actually does.
+    guardrail_material_regression: float = 0.10
     guardrail_metrics: tuple[str, ...] = field(
         default=(
             "average_order_value",
