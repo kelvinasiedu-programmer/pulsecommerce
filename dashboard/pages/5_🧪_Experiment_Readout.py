@@ -46,8 +46,8 @@ hero(
     eyebrow="Layer 05 · Experiment Readout",
     title="Did the intervention work?",
     subtitle=(
-        "Targeted retention promotion on high-churn-risk customers. Primary metric tested via Welch's t-test, "
-        "with guardrails to catch collateral damage."
+        "Targeted retention promotion on customers at risk of leaving who still buy. Primary metric tested "
+        "via Welch's t-test, with guardrails to catch collateral damage."
     ),
 )
 
@@ -218,7 +218,8 @@ st.markdown(
       <div style="font-size:0.8rem; color:{COLORS['text_muted']}; margin-top:12px;
                   padding-top:12px; border-top:1px solid {COLORS['border']};">
         Method: Welch's two-sample t-test (unequal variance) · α = 0.05 ·
-        Audience: top-30% churn-risk customers from the Churn Risk model.
+        Audience: churn risk 0.50 to 0.80 from the Churn Risk model. The top decile is
+        excluded because it has already stopped buying, which leaves nothing to measure.
       </div>
     </div>
     """,

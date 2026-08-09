@@ -50,9 +50,15 @@ Every Python layer reads from `metrics/` or `marts/` only - never from raw table
 
 ## Experiment (Layer 5)
 
-- **Audience**: top-30% risk deciles from Layer 4 (minimum 500 users)
-- **Assignment**: 50/50 random with a seed
-- **Effect simulation**: treatment receives +8 pp absolute conversion boost and a small negative drift on guardrails - so the readout is realistic, not trivial
+- **Audience**: churn risk 0.50 to 0.80 from Layer 4, minimum 500 users, falling back to
+  untargeted below that. The top decile is deliberately excluded: once retention decays it
+  converts at ~1%, which leaves 7 purchases across both arms and a verdict that flips on a
+  single customer
+- **Assignment**: 50/50 within strata of the pre-treatment outcome. Plain coin-flip assignment
+  let the arms start up to 8% apart on a ~57-converter-per-arm audience, and the readout booked
+  that gap as treatment effect
+- **Effect simulation**: treatment gets an 8% **relative** conversion lift, not 8 percentage
+  points, plus a small negative drift on guardrails - so the readout is realistic, not trivial
 - **Tests**: Welch's two-sample t-test for every metric at α = 0.05
 - **Decision rules** (see `kpi_dictionary.md`):
   - `ship` requires significant positive lift **and** no significant guardrail regression
