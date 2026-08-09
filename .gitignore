@@ -77,3 +77,9 @@ Thumbs.db
 # Streamlit
 .streamlit/secrets.toml
 .claude/
+
+# Speculative expansion, kept locally rather than shipped. Eight extra dashboard
+# layers modelled on Triple Whale / Matomo / CommerceIQ, never integrated and not
+# deployed anywhere. Committing it would put unfinished work in a repo whose
+# point is that everything in it runs.
+shadow/
