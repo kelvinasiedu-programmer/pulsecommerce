@@ -130,6 +130,13 @@ class ChurnModel:
             LEFT JOIN user_cancels uc ON a.user_id = uc.user_id
             LEFT JOIN future_orders fu ON a.user_id = fu.user_id
             WHERE a.frequency > 0
+            -- Load-bearing. DuckDB parallelises these joins, so without it the
+            -- rows come back in whatever order the threads finish. train_test_split
+            -- partitions by position, so a reshuffle silently retrains the model on
+            -- a different split - the scores moved between two consecutive runs on
+            -- identical data, which shifted the experiment audience and flipped its
+            -- published verdict.
+            ORDER BY a.user_id
             """,
             [
                 feature_cutoff,
@@ -169,6 +176,12 @@ class ChurnModel:
             random_state=self.cfg.random_state,
             verbosity=0,
             tree_method="hist",
+            # Histogram building splits across threads, and the aggregation order
+            # depends on which finish first - so scores drift with core count.
+            # That drift moved customers in and out of the experiment's risk band
+            # and flipped its verdict between machines. Single-threaded is
+            # reproducible, and 400 trees on ~7k rows costs seconds either way.
+            n_jobs=1,
         )
         return Pipeline([("pre", pre), ("model", model)])
 

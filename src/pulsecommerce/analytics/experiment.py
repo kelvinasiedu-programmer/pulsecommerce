@@ -95,6 +95,11 @@ class PromotionExperiment:
               ON u.user_id = o.user_id
              AND o.order_date >= ((SELECT max_d FROM bounds) - INTERVAL '%d days')
             GROUP BY u.user_id, u.country, u.traffic_source
+            -- Load-bearing, same reason as the churn feature query. Arm assignment
+            -- shuffles and permutes by position, so an unordered panel puts different
+            -- customers in different arms on every run. The verdict held, but the
+            -- reported lift swung by three points on identical data.
+            ORDER BY u.user_id
             """
             % window_days
         )
@@ -262,7 +267,20 @@ def _two_sample_test(
 
 
 def _decide(primary: MetricResult, guardrails: list[MetricResult]) -> tuple[str, str]:
-    guardrail_breach = [g for g in guardrails if g.is_significant and not g.direction_ok]
+    """Turn the metric results into a ship / iterate / reject call.
+
+    A guardrail has to clear practical significance as well as statistical
+    significance before it blocks. Testing three guardrails at alpha=0.05 and
+    rejecting on any one of them throws a false block roughly 14% of the time,
+    which is how a docs-only rebuild once flipped this readout from iterate to
+    reject on a 2% wobble in refund rate.
+    """
+    threshold = EXPERIMENT.guardrail_material_regression
+    guardrail_breach = [
+        g
+        for g in guardrails
+        if g.is_significant and not g.direction_ok and abs(g.rel_lift) >= threshold
+    ]
     if primary.is_significant and primary.rel_lift > 0 and not guardrail_breach:
         return (
             "ship",
