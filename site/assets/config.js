@@ -38,7 +38,7 @@ export const DASHBOARDS = [
       "A five-stage session funnel from first visit to purchase, split by device " +
       "and channel. The heatmap ranks 21 device-channel segments by end-to-end " +
       "conversion so the worst performers surface without hunting.",
-    src: "https://public.tableau.com/views/PulseCommerce-FunnelDrop-Off/FunnelDrop-Off",
+    src: "https://public.tableau.com/views/PulseCommerce-Funnel-Drop-Off/FunnelDrop-Off",
     height: 900,
   },
   {
