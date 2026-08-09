@@ -154,7 +154,7 @@ DuckDB for the warehouse (zero-config, SQL-native, bundles into the wheel),
 layered SQL transformations, scikit-learn + XGBoost + statsmodels for
 modeling, Streamlit + Plotly for the Python app, Tableau Public for the
 published dashboards, pytest / ruff / mypy, and GitHub Actions for CI across
-Python 3.10-3.12. Docker for reproducible deploy.
+Python 3.11-3.12. Docker for reproducible deploy.
 
 ## Tests
 

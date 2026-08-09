@@ -7,13 +7,12 @@ name = "pulsecommerce"
 version = "0.1.0"
 description = "End-to-end SMB commerce intelligence platform: KPI health, funnel, forecasting, churn, and experimentation on one unified warehouse."
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 license = { text = "MIT" }
 authors = [{ name = "Kelvin Asiedu" }]
 keywords = ["analytics", "ecommerce", "forecasting", "churn", "experimentation", "duckdb", "streamlit"]
 classifiers = [
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "License :: OSI Approved :: MIT License",
@@ -85,7 +84,7 @@ pythonpath = ["src"]
 cache_dir = ".tmp/pytest_cache"
 
 [tool.mypy]
-python_version = "3.10"
+python_version = "3.11"
 warn_return_any = true
 warn_unused_configs = true
 ignore_missing_imports = true
