@@ -200,5 +200,5 @@ downloadable, including the underlying extract. That is fine here because the
 data is synthetic, but do not develop the habit on real work.
 
 **Row limit.** Tableau Public caps a data source at 15 million rows.
-`orders_fact.csv` is about 257k, so there is plenty of headroom, but if you ever
+`orders_fact.csv` is about 59k, so there is plenty of headroom, but if you ever
 raise `n_orders` in `DataGenConfig` keep an eye on it.
