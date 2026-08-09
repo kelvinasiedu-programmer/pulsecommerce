@@ -25,7 +25,7 @@ from pulsecommerce.analytics.experiment import PromotionExperiment
 from pulsecommerce.analytics.forecast import DemandForecaster
 from pulsecommerce.analytics.funnel import FunnelAnalyst
 from pulsecommerce.analytics.health import HealthAnalyst
-from pulsecommerce.config import PROCESSED_DIR, ensure_dirs
+from pulsecommerce.config import EXPERIMENT, PROCESSED_DIR, ensure_dirs
 from pulsecommerce.logging_utils import get_logger
 from pulsecommerce.warehouse import Warehouse
 
@@ -100,14 +100,9 @@ def run_pipeline(out_dir: Path = PROCESSED_DIR) -> dict[str, Path]:
             _write_json({"skipped": True, "reason": str(exc)}, out_dir / "churn_metrics.json")
             paths["churn_metrics"] = out_dir / "churn_metrics.json"
 
-        # 5. Experiment on top-risk customers (or untargeted if churn skipped)
+        # 5. Experiment on customers at risk but still active (untargeted if churn skipped)
         logger.info("layer 5 - running simulated experiment readout")
-        if churn is not None:
-            audience = churn.scores.nlargest(max(int(len(churn.scores) * 0.3), 500), "churn_risk")[
-                ["user_id"]
-            ]
-        else:
-            audience = None
+        audience = _promo_audience(churn.scores) if churn is not None else None
         exp = PromotionExperiment(wh).run(audience=audience)
         _write_json(
             {
@@ -127,6 +122,34 @@ def run_pipeline(out_dir: Path = PROCESSED_DIR) -> dict[str, Path]:
 
     logger.info("pipeline complete - %d artifacts written", len(paths))
     return paths
+
+
+def _promo_audience(scores: pd.DataFrame) -> pd.DataFrame | None:
+    """Customers at risk of leaving who still buy.
+
+    Returns None when the band is too thin to test, which leaves the experiment
+    untargeted rather than reporting a verdict drawn from a handful of purchases.
+    """
+    floor, ceiling = EXPERIMENT.audience_risk_floor, EXPERIMENT.audience_risk_ceiling
+    in_band = scores["churn_risk"].between(floor, ceiling, inclusive="left")
+    audience = scores.loc[in_band, ["user_id"]]
+
+    if len(audience) < EXPERIMENT.min_sample_size:
+        logger.warning(
+            "risk band %.2f-%.2f holds only %s customers, running untargeted",
+            floor,
+            ceiling,
+            f"{len(audience):,}",
+        )
+        return None
+
+    logger.info(
+        "promo audience: %s customers in risk band %.2f-%.2f",
+        f"{len(audience):,}",
+        floor,
+        ceiling,
+    )
+    return audience
 
 
 def _write(df: pd.DataFrame, path: Path) -> Path:

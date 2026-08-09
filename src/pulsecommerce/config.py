@@ -113,6 +113,13 @@ class ChurnConfig:
 class ExperimentConfig:
     alpha: float = 0.05
     min_sample_size: int = 500
+    #: Churn-risk band for the retention promo audience. Targeting the top decile
+    #: sounds right and is useless: those customers have already stopped buying,
+    #: converting at ~1%, so a test on them lands 7 purchases across both arms and
+    #: a single customer flips the verdict. This band is customers showing warning
+    #: signs who still buy, which is who a retention team can actually move.
+    audience_risk_floor: float = 0.50
+    audience_risk_ceiling: float = 0.80
     guardrail_metrics: tuple[str, ...] = field(
         default=(
             "average_order_value",
