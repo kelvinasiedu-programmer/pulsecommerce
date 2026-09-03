@@ -2,16 +2,16 @@
 # ranges two builds a week apart resolved different scikit-learn and XGBoost
 # versions - enough to move churn scores, shift who fell in the experiment's
 # risk band, and flip the published verdict on a docs-only commit.
-duckdb==1.5.2
-pandas==3.0.2
-numpy==2.4.4
-scikit-learn==1.8.0
+duckdb==1.5.5
+pandas==3.0.5
+numpy==2.4.6
+scikit-learn==1.9.0
 xgboost==3.2.0
-statsmodels==0.14.6
+statsmodels==0.15.0
 scipy==1.17.1
-faker==40.13.0
-plotly==6.7.0
-streamlit==1.56.0
-pyarrow==23.0.1
+faker==40.37.0
+plotly==7.0.0
+streamlit==1.62.0
+pyarrow==25.0.1
 python-dateutil==2.9.0.post0
 rich==15.0.0
